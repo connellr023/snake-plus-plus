@@ -21,8 +21,7 @@ protected:
     }
 
 public:
-    FrameBuffer(int width, int height)
-        : width(width), height(height) {}
+    FrameBuffer(int width, int height) : width(width), height(height) {}
 
     virtual ~FrameBuffer() = default;
 
