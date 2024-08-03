@@ -1,14 +1,10 @@
-#include <X11/X.h>
-#include <cstdio>
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <memory>
 #include <cstdint>
-
-#include "framebuffer.h"
+#include "framebuffer.hpp"
 
 class LinuxFrameBuffer : public FrameBuffer {
 private:

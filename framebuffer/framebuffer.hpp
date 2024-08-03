@@ -1,6 +1,5 @@
 #ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
-#include <memory>
 #include <cstdint>
 #include <functional>
 #include <map>

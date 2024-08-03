@@ -1,6 +1,6 @@
 #include <memory>
-#include "keycodes.h"
-#include "framebuffer/framebuffer.h"
+#include "keycodes.hpp"
+#include "framebuffer/framebuffer.hpp"
 
 int main() {
     std::shared_ptr<FrameBuffer> fb(createFrameBuffer(800, 600));
