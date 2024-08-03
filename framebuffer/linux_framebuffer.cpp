@@ -1,8 +1,12 @@
+#include <X11/X.h>
+#include <cstdio>
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 #include <memory>
+#include <cstdint>
 
 #include "framebuffer.h"
 
@@ -13,6 +17,8 @@ private:
 
     Display* display;
     XImage* image;
+
+    Atom wmDeleteMessage;
 
 public:
     LinuxFrameBuffer(int width, int height)
@@ -33,38 +39,59 @@ public:
 
         this->image = XCreateImage(display, DefaultVisual(display, 0), DefaultDepth(display, 0), ZPixmap, 0, nullptr, this->width, this->height, 32, 0);
         this->image->data = (char *) malloc(this->width * this->height * sizeof(int));
+
+        wmDeleteMessage = XInternAtom(this->display, "WM_DELETE_WINDOW", False);
+        XSetWMProtocols(this->display, this->window, &wmDeleteMessage, 1);
+
+        this->setRunning(true);
     }
 
-    void render() override {
+    void render() {
         GC gc = DefaultGC(this->display, 0);
         XPutImage(this->display, this->window, gc, this->image, 0, 0, 0, 0, this->width, this->height);
     }
 
-    void handleEvents() override {
+    void loop() override {
         XEvent event;
 
-        while (XPending(this->display) > 0) {
+        while (XPending(this->display) > 0 && this->shouldRun()) {
             XNextEvent(this->display, &event);
 
             switch (event.type) {
-                case Expose:
+                case Expose: {
                     this->render();
                     break;
-                case KeyPress:
-                    exit(0);
+                }
+                case KeyPress: {
+                    KeySym key = XLookupKeysym(&event.xkey, 0);
+                    uint64_t keycode = static_cast<uint64_t>(key);
+
+                    this->notifyKeypress(keycode);
                     break;
+                }
+                case ClientMessage: {
+                    if ((Atom) event.xclient.data.l[0] == this->wmDeleteMessage) {
+                        setRunning(false);
+                    }
+
+                    break;
+                }
             }
         }
     }
 
+    void writePixel(int x, int y, uint32_t color) override {
+        assert(x >= 0 && x < this->width && y >= 0 && y < this->height);
+
+        uint32_t *pixel = (uint32_t *)(image->data + y * image->bytes_per_line + x * 4);
+        *pixel = color;
+    }
+
     ~LinuxFrameBuffer() override {
         if (this->image) {
-            if (this->image->data) {
-                free(this->image->data);
-            }
-
             this->image->f.destroy_image(this->image);
         }
+
         if (this->display) {
             XDestroyWindow(this->display, this->window);
             XCloseDisplay(this->display);
@@ -72,8 +99,8 @@ public:
     }
 };
 
-std::unique_ptr<FrameBuffer> createFrameBuffer(int width, int height) {
-    return std::make_unique<LinuxFrameBuffer>(width, height);
+FrameBuffer* createFrameBuffer(int width, int height) {
+    return new LinuxFrameBuffer(width, height);
 }
 
 #endif // __linux__
