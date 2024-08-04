@@ -6,7 +6,7 @@
 
 int main() {
     std::shared_ptr<FrameBuffer> fb(create_frame_buffer(FB_WIDTH, FB_HEIGHT));
-    std::shared_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT, TPS));
+    std::shared_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT, TICK_MS));
 
     fb->create_window();
 
@@ -17,7 +17,9 @@ int main() {
     game->init();
 
     while (fb->should_run()) {
-        fb->loop();
+        fb->handleEvents();
+        fb->render();
+
         game->loop();
     }
 

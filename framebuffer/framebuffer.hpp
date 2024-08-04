@@ -26,7 +26,8 @@ public:
     virtual ~FrameBuffer() = default;
 
     virtual void create_window() = 0;
-    virtual void loop() = 0;
+    virtual void render() = 0;
+    virtual void handleEvents() = 0;
     virtual void write_pixel(int x, int y, uint32_t color) = 0;
 
     void register_keypress_listener(uint64_t keycode, keypress_listener_t listener) {

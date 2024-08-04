@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define TPS             1
+#define TICK_MS         70
 
 #define GRID_WIDTH      40
 #define GRID_HEIGHT     21

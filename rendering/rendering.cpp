@@ -26,14 +26,14 @@ void draw_sprite(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t 
     }
 }
 
-void draw_tile(FrameBuffer &fb, int tile_x, int tile_y, tile_t tile) {
+void draw_tile(FrameBuffer &fb, int tile_x, int tile_y, Tile tile) {
     const int pixel_pos_x = tile_x * TILE_PIXELS;
     const int pixel_pos_y = tile_y * TILE_PIXELS;
 
     const uint32_t bg_color = calc_bg_color(tile_x, tile_y);
 
     switch (tile) {
-        case SNAKE: {
+        case Tile::Snake: {
             draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, SNAKE_COLOR);
             break;
         }

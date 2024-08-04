@@ -1,3 +1,4 @@
+#include <cstdio>
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <cstdlib>
@@ -10,6 +11,8 @@ class LinuxFrameBuffer : public FrameBuffer {
 private:
     Window window;
     Window root;
+
+    GC gc;
 
     Display* display;
     XImage* image;
@@ -36,18 +39,20 @@ public:
         this->image = XCreateImage(display, DefaultVisual(display, 0), DefaultDepth(display, 0), ZPixmap, 0, nullptr, this->width, this->height, 32, 0);
         this->image->data = (char *) malloc(this->width * this->height * sizeof(uint32_t));
 
+        this->gc = DefaultGC(this->display, 0);
+
         wmDeleteMessage = XInternAtom(this->display, "WM_DELETE_WINDOW", False);
         XSetWMProtocols(this->display, this->window, &wmDeleteMessage, 1);
 
         this->set_running(true);
     }
 
-    void render() {
-        GC gc = DefaultGC(this->display, 0);
-        XPutImage(this->display, this->window, gc, this->image, 0, 0, 0, 0, this->width, this->height);
+    void render() override {
+        XPutImage(this->display, this->window, this->gc, this->image, 0, 0, 0, 0, this->width, this->height);
+        XFlush(this->display);
     }
 
-    void loop() override {
+    void handleEvents() override {
         XEvent event;
 
         while (XPending(this->display) > 0 && this->should_run()) {

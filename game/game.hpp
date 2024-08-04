@@ -1,20 +1,19 @@
 #ifndef GAME_H
 #define GAME_H
 #include <memory>
-#include <map>
-#include "game_notifier.hpp"
 #include "snake/snake.hpp"
 #include "../framebuffer/framebuffer.hpp"
 
 #define SNAKE_SPAWN_X   3
 #define SNAKE_SPAWN_Y   3
 
+#define MAX_SNAKE_SIZE  100
 #define MAX_LIVES       10
 
-typedef enum {
-    EMPTY,
-    SNAKE
-} tile_t;
+enum class Tile {
+    Empty,
+    Snake
+};
 
 class Game {
 private:
@@ -22,41 +21,34 @@ private:
 
     int grid_width;
     int grid_height;
-    int ticks_per_second;
+    int tick_ms;
     uint64_t last_tick;
 
-    std::unique_ptr<tile_t[]> grid;
+    std::unique_ptr<Tile[]> grid;
     std::unique_ptr<Snake> snake;
-
-    std::map<notification_t, notification_listener_t> listeners;
 
     uint16_t score = 0;
     uint8_t lives = 0;
 
     void tick();
 
-    void register_listener(notification_t notification, notification_listener_t listener);
-
-    void set_lives(uint8_t lives);
-    void set_tile(int x, int y, tile_t tile);
-    tile_t get_tile(int x, int y);
-
 public:
-    Game(FrameBuffer &fb, int grid_width, int grid_height, int ticks_per_second) :
+    Game(FrameBuffer &fb, int grid_width, int grid_height, int tick_ms) :
         fb(fb),
         grid_width(grid_width),
         grid_height(grid_height),
-        ticks_per_second(ticks_per_second)
+        tick_ms(tick_ms)
     {
-        const notifier_callback_t callback = [this](notification_t notification, void *data) {
-            if (this->listeners.find(notification) != this->listeners.end()) {
-                this->listeners[notification](data);
-            }
-        };
-
-        this->grid = std::make_unique<tile_t[]>(grid_width * grid_height);
-        this->snake = std::unique_ptr<Snake>(new Snake(callback, SNAKE_SPAWN_X, SNAKE_SPAWN_Y));
+        this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
+        this->snake = std::unique_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
     }
+
+    void set_lives(uint8_t lives);
+    void set_tile(int x, int y, Tile tile);
+    Tile get_tile(int x, int y);
+
+    int get_grid_width() const { return grid_width; }
+    int get_grid_height() const { return grid_height; }
 
     void init();
     void loop();
