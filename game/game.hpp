@@ -23,6 +23,7 @@ private:
     uint8_t lives = 0;
 
     void tick();
+    void set_lives(uint8_t lives);
     void set_tile(int x, int y, tile_t tile);
     tile_t get_tile(int x, int y);
 

@@ -2,9 +2,17 @@
 #include <cassert>
 #include "game.hpp"
 #include "../rendering/rendering.hpp"
+#include "../rendering/sprites.hpp"
+#include "../rendering/colors.hpp"
+
+void Game::set_lives(uint8_t lives) {
+    this->lives = lives;
+    RENDER_UI_UINT(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
+}
 
 void Game::set_tile(int x, int y, tile_t tile) {
     assert(x >= 0 && x < this->grid_width && y >= 0 && y < this->grid_height);
+    draw_tile(this->fb, x, y, tile);
     this->grid[y * this->grid_width + x] = tile;
 }
 
@@ -17,11 +25,11 @@ void Game::init() {
     for (int y = 0; y < this->grid_height; y++) {
         for (int x = 0; x < this->grid_width; x++) {
             set_tile(x, y, EMPTY);
-            draw_tile(this->fb, x, y, EMPTY);
         }
     }
 
-    draw_lives(this->fb, 0);
+    RENDER_UI_SPRITE(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
+    set_lives(this->max_lives);
 }
 
 void Game::loop() {
