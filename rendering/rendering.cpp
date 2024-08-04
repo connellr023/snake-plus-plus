@@ -33,6 +33,10 @@ void draw_tile(FrameBuffer &fb, int tile_x, int tile_y, tile_t tile) {
     const uint32_t bg_color = calc_bg_color(tile_x, tile_y);
 
     switch (tile) {
+        case SNAKE: {
+            draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, SNAKE_COLOR);
+            break;
+        }
         default: {
             draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, bg_color);
             break;

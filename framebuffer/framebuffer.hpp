@@ -8,15 +8,15 @@ typedef std::function<void()> keypress_listener_t;
 
 class FrameBuffer {
 protected:
-    std::map<uint64_t, keypress_listener_t> keypressListeners;
+    std::map<uint64_t, keypress_listener_t> keypress_listeners;
 
-    bool isRunning = false;
+    bool is_running = false;
     int width;
     int height;
 
-    void notifyKeypress(uint64_t key) {
-        if (this->keypressListeners.find(key) != this->keypressListeners.end()) {
-            this->keypressListeners[key]();
+    void notify_keypress(uint64_t key) {
+        if (this->keypress_listeners.find(key) != this->keypress_listeners.end()) {
+            this->keypress_listeners[key]();
         }
     }
 
@@ -25,23 +25,23 @@ public:
 
     virtual ~FrameBuffer() = default;
 
-    virtual void createWindow() = 0;
+    virtual void create_window() = 0;
     virtual void loop() = 0;
     virtual void write_pixel(int x, int y, uint32_t color) = 0;
 
-    void registerKeypressListener(uint64_t keycode, keypress_listener_t listener) {
-        this->keypressListeners[keycode] = listener;
+    void register_keypress_listener(uint64_t keycode, keypress_listener_t listener) {
+        this->keypress_listeners[keycode] = listener;
     }
 
-    bool shouldRun() const {
-        return this->isRunning;
+    bool should_run() const {
+        return this->is_running;
     }
 
-    void setRunning(bool running) {
-        this->isRunning = running;
+    void set_running(bool running) {
+        this->is_running = running;
     }
 };
 
-FrameBuffer* createFrameBuffer(int width, int height);
+FrameBuffer* create_frame_buffer(int width, int height);
 
 #endif // FRAMEBUFFER_H

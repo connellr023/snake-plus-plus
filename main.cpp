@@ -5,18 +5,18 @@
 #include "game/game.hpp"
 
 int main() {
-    std::shared_ptr<FrameBuffer> fb(createFrameBuffer(FB_WIDTH, FB_HEIGHT));
-    std::shared_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT, MAX_LIVES, TPS));
+    std::shared_ptr<FrameBuffer> fb(create_frame_buffer(FB_WIDTH, FB_HEIGHT));
+    std::shared_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT, TPS));
 
-    fb->createWindow();
+    fb->create_window();
 
-    fb->registerKeypressListener(KEY_ESC, [fb]() {
-       fb->setRunning(false);
+    fb->register_keypress_listener(KEY_ESC, [fb]() {
+       fb->set_running(false);
     });
 
     game->init();
 
-    while (fb->shouldRun()) {
+    while (fb->should_run()) {
         fb->loop();
         game->loop();
     }

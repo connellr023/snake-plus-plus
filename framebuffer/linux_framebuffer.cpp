@@ -20,7 +20,7 @@ public:
     LinuxFrameBuffer(int width, int height)
         : FrameBuffer(width, height), window(0), display(nullptr), image(nullptr) {}
 
-    void createWindow() override {
+    void create_window() override {
         this->display = XOpenDisplay(nullptr);
 
         if (!this->display) {
@@ -39,7 +39,7 @@ public:
         wmDeleteMessage = XInternAtom(this->display, "WM_DELETE_WINDOW", False);
         XSetWMProtocols(this->display, this->window, &wmDeleteMessage, 1);
 
-        this->setRunning(true);
+        this->set_running(true);
     }
 
     void render() {
@@ -50,7 +50,7 @@ public:
     void loop() override {
         XEvent event;
 
-        while (XPending(this->display) > 0 && this->shouldRun()) {
+        while (XPending(this->display) > 0 && this->should_run()) {
             XNextEvent(this->display, &event);
 
             switch (event.type) {
@@ -62,12 +62,12 @@ public:
                     KeySym key = XLookupKeysym(&event.xkey, 0);
                     uint64_t keycode = static_cast<uint64_t>(key);
 
-                    this->notifyKeypress(keycode);
+                    this->notify_keypress(keycode);
                     break;
                 }
                 case ClientMessage: {
                     if ((Atom) event.xclient.data.l[0] == this->wmDeleteMessage) {
-                        setRunning(false);
+                        set_running(false);
                     }
 
                     break;
@@ -93,7 +93,7 @@ public:
     }
 };
 
-FrameBuffer* createFrameBuffer(int width, int height) {
+FrameBuffer* create_frame_buffer(int width, int height) {
     return new LinuxFrameBuffer(width, height);
 }
 
