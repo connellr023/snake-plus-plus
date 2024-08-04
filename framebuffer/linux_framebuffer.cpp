@@ -1,3 +1,4 @@
+#include <iostream>
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <cstdlib>
@@ -34,7 +35,7 @@ public:
         XMapWindow(this->display, this->window);
 
         this->image = XCreateImage(display, DefaultVisual(display, 0), DefaultDepth(display, 0), ZPixmap, 0, nullptr, this->width, this->height, 32, 0);
-        this->image->data = (char *) malloc(this->width * this->height * sizeof(int));
+        this->image->data = (char *) malloc(this->width * this->height * sizeof(uint32_t));
 
         wmDeleteMessage = XInternAtom(this->display, "WM_DELETE_WINDOW", False);
         XSetWMProtocols(this->display, this->window, &wmDeleteMessage, 1);
@@ -76,11 +77,9 @@ public:
         }
     }
 
-    void writePixel(int x, int y, uint32_t color) override {
+    void write_pixel(int x, int y, uint32_t color) override {
         assert(x >= 0 && x < this->width && y >= 0 && y < this->height);
-
-        uint32_t *pixel = (uint32_t *)(image->data + y * image->bytes_per_line + x * 4);
-        *pixel = color;
+        ((uint32_t *) this->image->data)[y * this->width + x] = color;
     }
 
     ~LinuxFrameBuffer() override {

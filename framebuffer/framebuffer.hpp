@@ -27,7 +27,7 @@ public:
 
     virtual void createWindow() = 0;
     virtual void loop() = 0;
-    virtual void writePixel(int x, int y, uint32_t color) = 0;
+    virtual void write_pixel(int x, int y, uint32_t color) = 0;
 
     void registerKeypressListener(uint64_t keycode, keypress_listener_t listener) {
         this->keypressListeners[keycode] = listener;
