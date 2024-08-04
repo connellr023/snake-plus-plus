@@ -1,4 +1,3 @@
-#include <iostream>
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <cstdlib>

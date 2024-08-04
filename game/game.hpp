@@ -37,7 +37,7 @@ public:
         grid = std::make_unique<tile_t[]>(grid_width * grid_height);
     }
 
-    void generate_and_draw_map();
+    void init();
     void loop();
 };
 

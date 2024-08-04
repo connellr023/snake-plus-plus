@@ -1,6 +1,7 @@
 #include <cstdint>
-#include "sprites.hpp"
+#include "rendering.hpp"
 #include "colors.hpp"
+#include "sprites.hpp"
 
 uint32_t calc_bg_color(int tile_x, int tile_y) {
     return (tile_x + tile_y) % 2 == 0
@@ -19,7 +20,7 @@ void draw_rect(FrameBuffer &fb, int x, int y, int width, int height, uint32_t co
 void draw_sprite(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite) {
     for (uint8_t y = 0; y < 8; y++) {
         for (uint8_t x = 0; x < 8; x++) {
-            const uint8_t bit = (sprite >> (y * 8 + x)) & 1;
+            const uint8_t bit = (sprite >> ((7 - y) * 8 + x)) & 1;
             draw_rect(fb, pixel_x + (x * scale), pixel_y + (y * scale), scale, scale, bit ? color : bg_color);
         }
     }
@@ -37,4 +38,8 @@ void draw_tile(FrameBuffer &fb, int tile_x, int tile_y, tile_t tile) {
             break;
         }
     }
+}
+
+void draw_lives(FrameBuffer &fb, int lives) {
+    RENDER_UI_SPRITE(fb, HEART_ICON_X, HEART_ICON_COLOR, HEART_SPRITE);
 }

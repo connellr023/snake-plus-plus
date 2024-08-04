@@ -15,4 +15,10 @@
 #define FLAG_COLOR              0xF6FA0A
 #define END_TEXT_COLOR          0xFFFFFF
 
+#define UI_TEXT_COLOR           0xCFCFCF
+#define CHALLENGE_ICON_COLOR    0xABEB34
+#define HEART_ICON_COLOR        0xFF001E
+#define CLOCK_ICON_COLOR        0x61F7FF
+#define STAR_ICON_COLOR         0xFFCF21
+
 #endif // COLORS_H

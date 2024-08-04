@@ -14,7 +14,7 @@ int main() {
        fb->setRunning(false);
     });
 
-    game->generate_and_draw_map();
+    game->init();
 
     while (fb->shouldRun()) {
         fb->loop();

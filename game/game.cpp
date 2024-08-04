@@ -1,7 +1,7 @@
 #include <chrono>
 #include <cassert>
 #include "game.hpp"
-#include "../sprites/sprites.hpp"
+#include "../rendering/rendering.hpp"
 
 void Game::set_tile(int x, int y, tile_t tile) {
     assert(x >= 0 && x < this->grid_width && y >= 0 && y < this->grid_height);
@@ -13,13 +13,15 @@ tile_t Game::get_tile(int x, int y) {
     return this->grid[y * this->grid_width + x];
 }
 
-void Game::generate_and_draw_map() {
+void Game::init() {
     for (int y = 0; y < this->grid_height; y++) {
         for (int x = 0; x < this->grid_width; x++) {
             set_tile(x, y, EMPTY);
             draw_tile(this->fb, x, y, EMPTY);
         }
     }
+
+    draw_lives(this->fb, 0);
 }
 
 void Game::loop() {

@@ -6,7 +6,7 @@ CXXFLAGS = -Wall
 TARGET = build
 
 # Source files
-SRCS = main.cpp framebuffer/linux_framebuffer.cpp game/game.cpp sprites/sprites.cpp
+SRCS = main.cpp framebuffer/linux_framebuffer.cpp game/game.cpp rendering/rendering.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
