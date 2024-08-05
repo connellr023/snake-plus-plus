@@ -1,6 +1,5 @@
 #include <chrono>
 #include <cassert>
-#include <cstdio>
 #include <memory>
 #include "game.hpp"
 #include "../rendering/rendering.hpp"
@@ -15,6 +14,7 @@ void Game::set_lives(uint8_t lives) {
 
 void Game::decrease_lives() {
     this->set_lives(this->lives - 1);
+    this->snake->reset(SNAKE_SPAWN_X, SNAKE_SPAWN_Y);
 }
 
 void Game::set_tile(int x, int y, Tile tile) {

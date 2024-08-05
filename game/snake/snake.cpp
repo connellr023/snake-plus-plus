@@ -1,5 +1,6 @@
 #include "snake.hpp"
 #include "../game.hpp"
+#include "../../rendering/colors.hpp"
 
 void Snake::set_direction(Direction dir) {
     const Direction current_dir = this->segments[this->head_idx].dir;
@@ -23,6 +24,47 @@ void Snake::set_direction(Direction dir) {
     }
 
     this->segments[this->head_idx].dir = dir;
+}
+
+void Snake::foreach_segment(segment_iterator_t iter) {
+    uint8_t idx = this->head_idx;
+
+    // Iterate until tail is reached
+    while (true) {
+        iter(&this->segments[idx]);
+
+        if (idx == this->tail_idx) {
+            break;
+        }
+
+        idx = (idx - 1 + this->max_length) % this->max_length;
+    }
+}
+
+void Snake::init(uint8_t start_x, uint8_t start_y) {
+    this->length = 1;
+    this->head_idx = 0;
+    this->tail_idx = 0;
+
+    this->segments[0].x = start_x;
+    this->segments[0].y = start_y;
+    this->segments[0].dir = Direction::Right;
+
+    this->color = SNAKE_COLOR;
+}
+
+void Snake::reset(uint8_t start_x, uint8_t start_y) {
+    // Clear snake from grid
+    this->foreach_segment([this](Segment *segment) {
+        this->game.set_tile(segment->x, segment->y, Tile::Empty);
+    });
+
+    // Reinitialize snake
+    this->init(start_x, start_y);
+
+    // Weird hack to reset the snake properly
+    this->grow();
+    this->length--;
 }
 
 bool Snake::grow() {

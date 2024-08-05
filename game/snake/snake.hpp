@@ -2,7 +2,7 @@
 #define SNAKE_H
 #include <memory>
 #include <stdint.h>
-#include "../../rendering/colors.hpp"
+#include <functional>
 
 #define FOOD_GROW_AMOUNT    6
 
@@ -21,6 +21,8 @@ struct Segment {
     Direction dir;
 };
 
+typedef std::function<void(Segment *)> segment_iterator_t;
+
 class Snake {
 private:
     Game &game;
@@ -33,25 +35,20 @@ private:
     uint8_t max_length;
     uint32_t color;
 
+    void init(uint8_t start_x, uint8_t start_y);
+    void foreach_segment(segment_iterator_t iter);
+
     bool grow();
     void collect_food();
 
 public:
     Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) : game(game), max_length(max_length) {
         this->segments = std::make_unique<Segment[]>(max_length);
-
-        this->head_idx = 0;
-        this->tail_idx = 0;
-        this->length = 1;
-
-        this->segments[this->head_idx].x = start_x;
-        this->segments[this->head_idx].y = start_y;
-        this->segments[this->head_idx].dir = Direction::Right;
-
-        this->color = SNAKE_COLOR;
+        this->init(start_x, start_y);
     }
 
     void loop();
+    void reset(uint8_t start_x, uint8_t start_y);
     void set_direction(Direction dir);
 };
 
