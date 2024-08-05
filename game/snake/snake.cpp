@@ -41,6 +41,28 @@ void Snake::foreach_segment(segment_iterator_t iter) {
     }
 }
 
+void Snake::update_color(uint32_t color) {
+    this->color = color;
+    this->foreach_segment([this](Segment *segment) {
+        // Re-render segment with new color
+        this->game.set_tile(segment->x, segment->y, this->game.get_tile(segment->x, segment->y));
+    });
+}
+
+void Snake::collect_portal() {
+    if (this->can_use_portal) {
+        return;
+    }
+
+    this->update_color(SNAKE_COLOR_1);
+    this->can_use_portal = true;
+}
+
+void Snake::on_portal_exit() {
+    this->color = SNAKE_COLOR;
+    this->can_use_portal = false;
+}
+
 void Snake::init(uint8_t start_x, uint8_t start_y) {
     this->length = 1;
     this->head_idx = 0;
@@ -178,18 +200,70 @@ void Snake::loop() {
 
     // Update new head position based on direction
     switch (dir) {
-        case Direction::Up:
-            this->segments[this->head_idx].y = (this->segments[this->head_idx].y - 1 + this->game.get_grid_height()) % this->game.get_grid_height();
+        case Direction::Up: {
+            if (this->segments[this->head_idx].y == 0) {
+                if (this->can_use_portal) {
+                    this->segments[this->head_idx].y = this->game.get_grid_height() - 1;
+                    this->on_portal_exit();
+                }
+                else {
+                    this->game.decrease_lives();
+                }
+            }
+            else {
+                this->segments[this->head_idx].y--;
+            }
+
             break;
-        case Direction::Down:
-            this->segments[this->head_idx].y = (this->segments[this->head_idx].y + 1) % this->game.get_grid_height();
+        }
+        case Direction::Down: {
+            if (this->segments[this->head_idx].y == this->game.get_grid_height() - 1) {
+                if (this->can_use_portal) {
+                    this->segments[this->head_idx].y = 0;
+                    this->on_portal_exit();
+                }
+                else {
+                    this->game.decrease_lives();
+                }
+            }
+            else {
+                this->segments[this->head_idx].y++;
+            }
+
             break;
-        case Direction::Left:
-            this->segments[this->head_idx].x = (this->segments[this->head_idx].x - 1 + this->game.get_grid_width()) % this->game.get_grid_width();
+        }
+        case Direction::Left: {
+            if (this->segments[this->head_idx].x == 0) {
+                if (this->can_use_portal) {
+                    this->segments[this->head_idx].x = this->game.get_grid_width() - 1;
+                    this->on_portal_exit();
+                }
+                else {
+                    this->game.decrease_lives();
+                }
+            }
+            else {
+                this->segments[this->head_idx].x--;
+            }
+
             break;
-        case Direction::Right:
-            this->segments[this->head_idx].x = (this->segments[this->head_idx].x + 1) % this->game.get_grid_width();
+        }
+        case Direction::Right: {
+            if (this->segments[this->head_idx].x == this->game.get_grid_width() - 1) {
+                if (this->can_use_portal) {
+                    this->segments[this->head_idx].x = 0;
+                    this->on_portal_exit();
+                }
+                else {
+                    this->game.decrease_lives();
+                }
+            }
+            else {
+                this->segments[this->head_idx].x++;
+            }
+
             break;
+        }
     }
 
     // Collision detection
@@ -205,6 +279,9 @@ void Snake::loop() {
             break;
         case Tile::Food:
             this->collect_food();
+            break;
+        case Tile::Portal:
+            this->collect_portal();
             break;
         default:
             break;

@@ -36,11 +36,16 @@ private:
     uint8_t max_length;
     uint32_t color;
 
+    bool can_use_portal = false;
+
     void init(uint8_t start_x, uint8_t start_y);
     void foreach_segment(segment_iterator_t iter);
 
     bool grow();
     void collect_food();
+    void collect_portal();
+    void on_portal_exit();
+    void update_color(uint32_t color);
 
 public:
     Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) : game(game), max_length(max_length) {

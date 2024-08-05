@@ -8,26 +8,32 @@
 #include "snake/snake.hpp"
 #include "../framebuffer/framebuffer.hpp"
 
-#define SNAKE_SPAWN_X       3
-#define SNAKE_SPAWN_Y       3
+#define SNAKE_SPAWN_X           3
+#define SNAKE_SPAWN_Y           3
 
-#define FOOD_SPAWN_COUNT    3
+#define FOOD_SPAWN_COUNT        3
+#define PORTAL_SPAWN_COUNT      2
 
 #define MIN_FOOD_LIFETIME       30
 #define MAX_FOOD_LIFETIME       45
 
-#define SNAKE_MOVE_MS       85
-#define FOOD_SPAWN_MS       4000
-#define LIFE_TILE_MS        120
+#define MIN_PORTAL_LIFETIME     30
+#define MAX_PORTAL_LIFETIME     45
 
-#define MAX_SNAKE_SIZE      100
-#define MAX_LIVES           10
+#define SNAKE_MOVE_MS           85
+#define FOOD_SPAWN_MS           4000
+#define PORTAL_SPAWN_MS         5000
+#define LIFE_TILE_MS            120
+
+#define MAX_SNAKE_SIZE          100
+#define MAX_LIVES               10
 
 typedef std::function<void()> interval_listener_t;
 
 enum class Tile {
     Empty,
     Food,
+    Portal,
     SnakeHead,
     SnakeSegmentHorizontal,
     SnakeSegmentVertical,

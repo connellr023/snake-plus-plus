@@ -48,7 +48,7 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
 
         const uint64_t lifetime = min_lifetime + (rand() % (max_lifetime - min_lifetime));
 
-        this->set_tile(x, y, Tile::Food);
+        this->set_tile(x, y, tile);
         this->lifetime_tiles.insert(std::shared_ptr<LifetimeTileWrapper>(new LifetimeTileWrapper {
             .tile = tile,
             .tile_x = x,
@@ -80,7 +80,11 @@ void Game::init() {
     });
 
     this->register_interval_listener(FOOD_SPAWN_MS, [this]() {
-        this->generate_lifetime_tile(Tile::Food, 4, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
+        this->generate_lifetime_tile(Tile::Food, FOOD_SPAWN_COUNT, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
+    });
+
+    this->register_interval_listener(PORTAL_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::Portal, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
