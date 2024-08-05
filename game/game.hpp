@@ -1,23 +1,27 @@
 #ifndef GAME_H
 #define GAME_H
 #include <cstdint>
+#include <list>
+#include <set>
 #include <memory>
 #include <functional>
-#include <set>
 #include "snake/snake.hpp"
 #include "../framebuffer/framebuffer.hpp"
 
-#define SNAKE_SPAWN_X   3
-#define SNAKE_SPAWN_Y   3
+#define SNAKE_SPAWN_X       3
+#define SNAKE_SPAWN_Y       3
 
-#define FOOD_LIFETIME   40
+#define FOOD_SPAWN_COUNT    3
 
-#define SNAKE_MOVE_MS   85
-#define FOOD_SPAWN_MS   4000
-#define LIFE_TILE_MS    120
+#define MIN_FOOD_LIFETIME       30
+#define MAX_FOOD_LIFETIME       45
 
-#define MAX_SNAKE_SIZE  100
-#define MAX_LIVES       10
+#define SNAKE_MOVE_MS       85
+#define FOOD_SPAWN_MS       4000
+#define LIFE_TILE_MS        120
+
+#define MAX_SNAKE_SIZE      100
+#define MAX_LIVES           10
 
 typedef std::function<void()> interval_listener_t;
 
@@ -35,6 +39,7 @@ enum class Tile {
 
 struct IntervalListenerWrapper {
     uint64_t last_interval_ms;
+    uint64_t interval_ms;
     interval_listener_t listener;
 };
 
@@ -58,20 +63,21 @@ private:
 
     std::set<std::shared_ptr<LifetimeTileWrapper>> lifetime_tiles;
 
-    std::map<int, IntervalListenerWrapper> interval_listeners;
+    std::list<std::shared_ptr<IntervalListenerWrapper>> interval_listeners;
 
     uint16_t score = 0;
     uint8_t lives = 0;
 
-    void register_interval_listener(int interval_ms, interval_listener_t listener) {
-        this->interval_listeners[interval_ms] = IntervalListenerWrapper {
+    void register_interval_listener(uint64_t interval_ms, interval_listener_t listener) {
+        this->interval_listeners.push_front(std::shared_ptr<IntervalListenerWrapper>(new IntervalListenerWrapper {
             .last_interval_ms = 0,
+            .interval_ms = interval_ms,
             .listener = listener
-        };
+        }));
     }
 
     void generate_map();
-    void generate_food();
+    void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
 
 public:
     Game(FrameBuffer &fb, int grid_width, int grid_height) :

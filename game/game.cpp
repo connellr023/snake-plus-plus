@@ -36,22 +36,26 @@ void Game::generate_map() {
     }
 }
 
-void Game::generate_food() {
+void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime) {
     uint8_t x = rand() % this->grid_width;
     uint8_t y = rand() % this->grid_height;
 
-    while (this->get_tile(x, y) != Tile::Empty) {
-        x = rand() % this->grid_width;
-        y = rand() % this->grid_height;
-    }
+    for (uint8_t i = 0; i < amount; i++) {
+        while (this->get_tile(x, y) != Tile::Empty) {
+            x = rand() % this->grid_width;
+            y = rand() % this->grid_height;
+        }
 
-    this->set_tile(x, y, Tile::Food);
-    this->lifetime_tiles.insert(std::shared_ptr<LifetimeTileWrapper>(new LifetimeTileWrapper {
-        .tile = Tile::Food,
-        .tile_x = x,
-        .tile_y = y,
-        .life_left = FOOD_LIFETIME
-    }));
+        const uint64_t lifetime = min_lifetime + (rand() % (max_lifetime - min_lifetime));
+
+        this->set_tile(x, y, Tile::Food);
+        this->lifetime_tiles.insert(std::shared_ptr<LifetimeTileWrapper>(new LifetimeTileWrapper {
+            .tile = tile,
+            .tile_x = x,
+            .tile_y = y,
+            .life_left = lifetime
+        }));
+    }
 }
 
 void Game::init() {
@@ -76,7 +80,7 @@ void Game::init() {
     });
 
     this->register_interval_listener(FOOD_SPAWN_MS, [this]() {
-        this->generate_food();
+        this->generate_lifetime_tile(Tile::Food, 4, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
@@ -121,10 +125,10 @@ void Game::loop() {
 
     uint64_t millis = static_cast<uint64_t>(duration);
 
-    for (auto &[interval_ms, interval_wrapper] : this->interval_listeners) {
-        if (interval_wrapper.last_interval_ms + interval_ms < millis) {
-            interval_wrapper.listener();
-            interval_wrapper.last_interval_ms = millis;
+    for (auto interval_wrapper : this->interval_listeners) {
+        if (interval_wrapper->last_interval_ms + interval_wrapper->interval_ms < millis) {
+            interval_wrapper->listener();
+            interval_wrapper->last_interval_ms = millis;
         }
     }
 }

@@ -31,7 +31,6 @@
     (0b00111100ULL <<  8) | \
     (0b00111100ULL <<  0) \
 
-
 #define SPRITE_SNAKE_BODY \
     (0b00111100ULL << 56) | \
     (0b00111100ULL << 48) | \
