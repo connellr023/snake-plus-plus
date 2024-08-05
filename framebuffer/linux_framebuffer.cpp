@@ -1,5 +1,5 @@
-#include <cstdio>
 #ifdef __linux__
+#include <cstdio>
 #include <X11/Xlib.h>
 #include <cstdlib>
 #include <cstring>
@@ -71,7 +71,7 @@ public:
                     break;
                 }
                 case ClientMessage: {
-                    if ((Atom) event.xclient.data.l[0] == this->wmDeleteMessage) {
+                    if (static_cast<Atom>(event.xclient.data.l[0]) == this->wmDeleteMessage) {
                         set_running(false);
                     }
 

@@ -1,17 +1,12 @@
 #include <chrono>
 #include <cassert>
+#include <cstdio>
 #include <memory>
 #include "game.hpp"
 #include "../rendering/rendering.hpp"
 #include "../rendering/sprites.hpp"
 #include "../rendering/colors.hpp"
 #include "../keycodes.hpp"
-
-void Game::register_interval_listener(int interval_ms, interval_listener_t listener) {
-    if (this->interval_listeners.find(interval_ms) == this->interval_listeners.end()) {
-        this->interval_listeners[interval_ms] = listener;
-    }
-}
 
 void Game::set_lives(uint8_t lives) {
     this->lives = lives;
@@ -33,6 +28,32 @@ Tile Game::get_tile(int x, int y) {
     return this->grid[y * this->grid_width + x];
 }
 
+void Game::generate_map() {
+    for (int y = 0; y < this->grid_height; y++) {
+        for (int x = 0; x < this->grid_width; x++) {
+            this->set_tile(x, y, Tile::Empty);
+        }
+    }
+}
+
+void Game::generate_food() {
+    uint8_t x = rand() % this->grid_width;
+    uint8_t y = rand() % this->grid_height;
+
+    while (this->get_tile(x, y) != Tile::Empty) {
+        x = rand() % this->grid_width;
+        y = rand() % this->grid_height;
+    }
+
+    this->set_tile(x, y, Tile::Food);
+    this->lifetime_tiles.insert(std::shared_ptr<LifetimeTileWrapper>(new LifetimeTileWrapper {
+        .tile = Tile::Food,
+        .tile_x = x,
+        .tile_y = y,
+        .life_left = FOOD_LIFETIME
+    }));
+}
+
 void Game::init() {
     this->fb.register_keypress_listener(KEY_UP, [this]() {
         this->snake->set_direction(Direction::Up);
@@ -50,18 +71,48 @@ void Game::init() {
         this->snake->set_direction(Direction::Right);
     });
 
-    for (int y = 0; y < this->grid_height; y++) {
-        for (int x = 0; x < this->grid_width; x++) {
-            set_tile(x, y, Tile::Empty);
-        }
-    }
+    this->register_interval_listener(SNAKE_MOVE_MS, [this]() {
+        this->snake->loop();
+    });
 
+    this->register_interval_listener(FOOD_SPAWN_MS, [this]() {
+        this->generate_food();
+    });
+
+    this->register_interval_listener(LIFE_TILE_MS, [this]() {
+        for (auto it = this->lifetime_tiles.begin(); it != this->lifetime_tiles.end();) {
+            auto lifetime_tile = *it;
+            lifetime_tile->life_left--;
+
+            if (this->get_tile(lifetime_tile->tile_x, lifetime_tile->tile_y) != lifetime_tile->tile) {
+                it = this->lifetime_tiles.erase(it);
+                continue;
+            }
+            else if (lifetime_tile->life_left <= 0) {
+                this->set_tile(lifetime_tile->tile_x, lifetime_tile->tile_y, Tile::Empty);
+                it = this->lifetime_tiles.erase(it);
+                continue;
+            }
+
+            if (lifetime_tile->life_left <= 10) {
+                if (lifetime_tile->life_left % 2 == 0) {
+                    draw_tile(this->fb, lifetime_tile->tile_x, lifetime_tile->tile_y, lifetime_tile->tile);
+                }
+                else {
+                    draw_tile(this->fb, lifetime_tile->tile_x, lifetime_tile->tile_y, Tile::Empty);
+                }
+            }
+
+            it++;
+        }
+    });
+
+    // Initialize UI
     RENDER_UI_SPRITE(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
     set_lives(MAX_LIVES);
 
-    // Test food
-    set_tile(5, 5, Tile::Food);
-    set_tile(20, 17, Tile::Food);
+    // Initialize map
+    this->generate_map();
 }
 
 void Game::loop() {
@@ -70,12 +121,10 @@ void Game::loop() {
 
     uint64_t millis = static_cast<uint64_t>(duration);
 
-    if (this->last_tick + this->tick_ms < millis) {
-        this->tick();
-        this->last_tick = millis;
+    for (auto &[interval_ms, interval_wrapper] : this->interval_listeners) {
+        if (interval_wrapper.last_interval_ms + interval_ms < millis) {
+            interval_wrapper.listener();
+            interval_wrapper.last_interval_ms = millis;
+        }
     }
-}
-
-void Game::tick() {
-    this->snake->loop();
 }

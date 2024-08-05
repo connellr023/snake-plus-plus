@@ -6,7 +6,7 @@
 
 int main() {
     std::shared_ptr<FrameBuffer> fb(create_frame_buffer(FB_WIDTH, FB_HEIGHT));
-    std::unique_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT, TICK_MS));
+    std::unique_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT));
 
     fb->create_window();
 
