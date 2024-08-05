@@ -9,6 +9,8 @@
 
 #define HEART_ICON_X        5
 #define LIVES_TEXT_X        (UI_GLYPH_SCALE * 8) + HEART_ICON_X
+#define STAR_ICON_X         (UI_GLYPH_SCALE * 8 * 3) + LIVES_TEXT_X
+#define SCORE_TEXT_X        (UI_GLYPH_SCALE * 8) + STAR_ICON_X
 
 #define TILE_PIXELS         32
 #define TILE_SPRITE_SCALE   TILE_PIXELS / 8

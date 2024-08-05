@@ -96,6 +96,7 @@ public:
     }
 
     void set_lives(uint8_t lives);
+    void set_score(uint16_t score);
     void set_tile(int x, int y, Tile tile);
     Tile get_tile(int x, int y);
 

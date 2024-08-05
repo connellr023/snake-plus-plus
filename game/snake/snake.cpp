@@ -87,6 +87,8 @@ void Snake::reset(uint8_t start_x, uint8_t start_y) {
     // Weird hack to reset the snake properly
     this->grow();
     this->length--;
+
+    this->game.set_score(0);
 }
 
 bool Snake::grow() {
@@ -103,6 +105,8 @@ bool Snake::grow() {
     this->segments[new_tail_idx].y = this->segments[this->tail_idx].y;
 
     this->tail_idx = new_tail_idx;
+
+    this->game.set_score(this->length);
 
     return true;
 }

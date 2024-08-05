@@ -12,6 +12,11 @@ void Game::set_lives(uint8_t lives) {
     draw_ui_uint(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
 }
 
+void Game::set_score(uint16_t score) {
+    this->score = score;
+    draw_ui_uint(this->fb, SCORE_TEXT_X, UI_TEXT_COLOR, 3, this->score);
+}
+
 void Game::decrease_lives() {
     this->set_lives(this->lives - 1);
     this->snake->reset(SNAKE_SPAWN_X, SNAKE_SPAWN_Y);
@@ -119,13 +124,18 @@ void Game::init() {
     draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
     set_lives(MAX_LIVES);
 
+    draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
+    set_score(0);
+
     // Initialize map
     this->generate_map();
 }
 
 void Game::loop() {
+    using milliseconds = std::chrono::milliseconds;
+
     auto now = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    auto duration = std::chrono::duration_cast<milliseconds>(now.time_since_epoch()).count();
 
     uint64_t millis = static_cast<uint64_t>(duration);
 
