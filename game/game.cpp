@@ -19,7 +19,7 @@ void Game::decrease_lives() {
 
 void Game::set_tile(int x, int y, Tile tile) {
     assert(x >= 0 && x < this->grid_width && y >= 0 && y < this->grid_height);
-    draw_tile(this->fb, x, y, tile);
+    draw_tile(this->fb, *this->snake, x, y, tile);
     this->grid[y * this->grid_width + x] = tile;
 }
 
@@ -96,10 +96,10 @@ void Game::init() {
 
             if (lifetime_tile->life_left <= 10) {
                 if (lifetime_tile->life_left % 2 == 0) {
-                    draw_tile(this->fb, lifetime_tile->tile_x, lifetime_tile->tile_y, lifetime_tile->tile);
+                    draw_tile(this->fb, *this->snake, lifetime_tile->tile_x, lifetime_tile->tile_y, lifetime_tile->tile);
                 }
                 else {
-                    draw_tile(this->fb, lifetime_tile->tile_x, lifetime_tile->tile_y, Tile::Empty);
+                    draw_tile(this->fb, *this->snake, lifetime_tile->tile_x, lifetime_tile->tile_y, Tile::Empty);
                 }
             }
 

@@ -20,7 +20,7 @@ uint32_t calc_bg_color(int tile_x, int tile_y);
 void draw_rect(FrameBuffer &fb, int x, int y, int width, int height, uint32_t color);
 void draw_sprite(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation);
 void draw_uint(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint8_t digits, uint16_t value);
-void draw_tile(FrameBuffer &fb, int tile_x, int tile_y, Tile tile);
+void draw_tile(FrameBuffer &fb, Snake &snake, int tile_x, int tile_y, Tile tile);
 
 void draw_ui_sprite(FrameBuffer &fb, int x, uint32_t color, uint64_t sprite);
 void draw_ui_uint(FrameBuffer &fb, int x, uint32_t color, uint8_t digits, uint16_t value);

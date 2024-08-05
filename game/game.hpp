@@ -23,8 +23,14 @@ typedef std::function<void()> interval_listener_t;
 
 enum class Tile {
     Empty,
-    Snake,
-    Food
+    Food,
+    SnakeHead,
+    SnakeSegmentHorizontal,
+    SnakeSegmentVertical,
+    SnakeSegmentBottomLeft,
+    SnakeSegmentBottomRight,
+    SnakeSegmentTopLeft,
+    SnakeSegmentTopRight
 };
 
 struct IntervalListenerWrapper {

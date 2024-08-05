@@ -1,5 +1,6 @@
 #ifndef SNAKE_H
 #define SNAKE_H
+#include <cstdint>
 #include <memory>
 #include <stdint.h>
 #include <functional>
@@ -50,6 +51,14 @@ public:
     void loop();
     void reset(uint8_t start_x, uint8_t start_y);
     void set_direction(Direction dir);
+
+    Direction get_direction() const {
+        return this->segments[this->head_idx].dir;
+    }
+
+    uint32_t get_color() const {
+        return this->color;
+    }
 };
 
 #endif // SNAKE_H

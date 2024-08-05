@@ -96,9 +96,75 @@ void Snake::collect_food() {
 void Snake::loop() {
     const Direction dir = this->segments[this->head_idx].dir;
 
-    // if (this->length > 1) {
+    if (this->length > 1) {
+        const Direction prev_dir = this->segments[(this->head_idx - 1 + this->max_length) % this->max_length].dir;
+        Tile new_segment;
 
-    // }
+        switch (dir) {
+            case Direction::Up: {
+                switch (prev_dir) {
+                    case Direction::Left:
+                        new_segment = Tile::SnakeSegmentBottomLeft;
+                        break;
+                    case Direction::Right:
+                        new_segment = Tile::SnakeSegmentBottomRight;
+                        break;
+                    default:
+                        new_segment = Tile::SnakeSegmentVertical;
+                        break;
+                }
+
+                break;
+            }
+            case Direction::Down: {
+                switch (prev_dir) {
+                    case Direction::Left:
+                        new_segment = Tile::SnakeSegmentTopLeft;
+                        break;
+                    case Direction::Right:
+                        new_segment = Tile::SnakeSegmentTopRight;
+                        break;
+                    default:
+                        new_segment = Tile::SnakeSegmentVertical;
+                        break;
+                }
+
+                break;
+            }
+            case Direction::Left: {
+                switch (prev_dir) {
+                    case Direction::Up:
+                        new_segment = Tile::SnakeSegmentTopRight;
+                        break;
+                    case Direction::Down:
+                        new_segment = Tile::SnakeSegmentBottomRight;
+                        break;
+                    default:
+                        new_segment = Tile::SnakeSegmentHorizontal;
+                        break;
+                }
+
+                break;
+            }
+            case Direction::Right: {
+                switch (prev_dir) {
+                    case Direction::Up:
+                        new_segment = Tile::SnakeSegmentTopLeft;
+                        break;
+                    case Direction::Down:
+                        new_segment = Tile::SnakeSegmentBottomLeft;
+                        break;
+                    default:
+                        new_segment = Tile::SnakeSegmentHorizontal;
+                        break;
+                }
+
+                break;
+            }
+        }
+
+        this->game.set_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y, new_segment);
+    }
 
     // Update head index
     this->head_idx = (this->head_idx + 1) % this->max_length;
@@ -128,18 +194,24 @@ void Snake::loop() {
 
     // Collision detection
     switch (this->game.get_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y)) {
+        case Tile::SnakeSegmentTopLeft:
+        case Tile::SnakeSegmentTopRight:
+        case Tile::SnakeSegmentBottomLeft:
+        case Tile::SnakeSegmentBottomRight:
+        case Tile::SnakeSegmentHorizontal:
+        case Tile::SnakeSegmentVertical:
+        case Tile::SnakeHead:
+            this->game.decrease_lives();
+            break;
         case Tile::Food:
             this->collect_food();
-            break;
-        case Tile::Snake:
-            this->game.decrease_lives();
             break;
         default:
             break;
     }
 
     // Render changes
-    this->game.set_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y, Tile::Snake);
+    this->game.set_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y, Tile::SnakeHead);
 
     // Clear previous tail position
     this->game.set_tile(this->segments[this->tail_idx].x, this->segments[this->tail_idx].y, Tile::Empty);
