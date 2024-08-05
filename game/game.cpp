@@ -9,7 +9,7 @@
 
 void Game::set_lives(uint8_t lives) {
     this->lives = lives;
-    RENDER_UI_UINT(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
+    draw_ui_uint(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
 }
 
 void Game::decrease_lives() {
@@ -108,7 +108,7 @@ void Game::init() {
     });
 
     // Initialize UI
-    RENDER_UI_SPRITE(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
+    draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
     set_lives(MAX_LIVES);
 
     // Initialize map

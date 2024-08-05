@@ -17,10 +17,14 @@ void draw_rect(FrameBuffer &fb, int x, int y, int width, int height, uint32_t co
     }
 }
 
-void draw_sprite(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite) {
+const static bit_extractor_t orientation_normal = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
+    return (sprite >> ((7 - y) * 8 + (7 - x))) & 1;
+};
+
+void draw_sprite(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation) {
     for (uint8_t y = 0; y < 8; y++) {
         for (uint8_t x = 0; x < 8; x++) {
-            const uint8_t bit = (sprite >> ((7 - y) * 8 + (7 - x))) & 1;
+            const uint8_t bit = orientation(x, y, sprite);
             draw_rect(fb, pixel_x + (x * scale), pixel_y + (y * scale), scale, scale, bit ? color : bg_color);
         }
     }
@@ -37,7 +41,7 @@ void draw_tile(FrameBuffer &fb, int tile_x, int tile_y, Tile tile) {
             draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, SNAKE_COLOR);
             break;
         case Tile::Food:
-            draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, GROW_PACK_COLOR);
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, GROW_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
             break;
         default:
             draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, bg_color);
@@ -72,6 +76,14 @@ void draw_uint(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t co
     }
 
     for (uint8_t k = 0; k < digits; k++) {
-        draw_sprite(fb, pixel_x + (k * 8 * scale), pixel_y, scale, color, bg_color, number_sprites[digit_buffer[k]]);
+        draw_sprite(fb, pixel_x + (k * 8 * scale), pixel_y, scale, color, bg_color, number_sprites[digit_buffer[k]], orientation_normal);
     }
+}
+
+void draw_ui_sprite(FrameBuffer &fb, int x, uint32_t color, uint64_t sprite) {
+    draw_sprite(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, sprite, orientation_normal);
+}
+
+void draw_ui_uint(FrameBuffer &fb, int x, uint32_t color, uint8_t digits, uint16_t value) {
+    draw_uint(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, digits, value);
 }
