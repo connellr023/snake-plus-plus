@@ -7,9 +7,19 @@
 #include "../rendering/colors.hpp"
 #include "../keycodes.hpp"
 
+void Game::register_interval_listener(int interval_ms, interval_listener_t listener) {
+    if (this->interval_listeners.find(interval_ms) == this->interval_listeners.end()) {
+        this->interval_listeners[interval_ms] = listener;
+    }
+}
+
 void Game::set_lives(uint8_t lives) {
     this->lives = lives;
     RENDER_UI_UINT(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
+}
+
+void Game::decrease_lives() {
+    this->set_lives(this->lives - 1);
 }
 
 void Game::set_tile(int x, int y, Tile tile) {
@@ -48,6 +58,10 @@ void Game::init() {
 
     RENDER_UI_SPRITE(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
     set_lives(MAX_LIVES);
+
+    // Test food
+    set_tile(5, 5, Tile::Food);
+    set_tile(20, 17, Tile::Food);
 }
 
 void Game::loop() {

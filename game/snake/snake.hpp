@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "../../rendering/colors.hpp"
 
+#define FOOD_GROW_AMOUNT    6
+
 class Game;
 
 enum class Direction {
@@ -30,6 +32,9 @@ private:
     uint8_t length;
     uint8_t max_length;
     uint32_t color;
+
+    bool grow();
+    void collect_food();
 
 public:
     Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) : game(game), max_length(max_length) {

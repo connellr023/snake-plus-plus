@@ -2,7 +2,53 @@
 #include "../game.hpp"
 
 void Snake::set_direction(Direction dir) {
+    const Direction current_dir = this->segments[this->head_idx].dir;
+
+    if (this->length > 1) {
+        if (current_dir == Direction::Up && dir == Direction::Down) {
+            return;
+        }
+
+        if (current_dir == Direction::Down && dir == Direction::Up) {
+            return;
+        }
+
+        if (current_dir == Direction::Left && dir == Direction::Right) {
+            return;
+        }
+
+        if (current_dir == Direction::Right && dir == Direction::Left) {
+            return;
+        }
+    }
+
     this->segments[this->head_idx].dir = dir;
+}
+
+bool Snake::grow() {
+    if (this->length >= this->max_length - 2) {
+        return false;
+    }
+
+    this->length++;
+
+    // Add new segment
+    const uint8_t new_tail_idx = (this->tail_idx - 1 + this->max_length) % this->max_length;
+
+    this->segments[new_tail_idx].x = this->segments[this->tail_idx].x;
+    this->segments[new_tail_idx].y = this->segments[this->tail_idx].y;
+
+    this->tail_idx = new_tail_idx;
+
+    return true;
+}
+
+void Snake::collect_food() {
+    for (uint8_t i = 0; i < FOOD_GROW_AMOUNT; i++) {
+        if (!this->grow()) {
+            break;
+        }
+    }
 }
 
 void Snake::loop() {
@@ -16,10 +62,10 @@ void Snake::loop() {
     this->head_idx = (this->head_idx + 1) % this->max_length;
 
     // Initialize next head position with previous head position and direction
-    const uint8_t prev = (this->head_idx - 1 + this->max_length) % this->max_length;
+    const uint8_t prev_head_idx = (this->head_idx - 1 + this->max_length) % this->max_length;
 
-    this->segments[this->head_idx].x = this->segments[prev].x;
-    this->segments[this->head_idx].y = this->segments[prev].y;
+    this->segments[this->head_idx].x = this->segments[prev_head_idx].x;
+    this->segments[this->head_idx].y = this->segments[prev_head_idx].y;
     this->segments[this->head_idx].dir = dir;
 
     // Update new head position based on direction
@@ -35,6 +81,18 @@ void Snake::loop() {
             break;
         case Direction::Right:
             this->segments[this->head_idx].x = (this->segments[this->head_idx].x + 1) % this->game.get_grid_width();
+            break;
+    }
+
+    // Collision detection
+    switch (this->game.get_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y)) {
+        case Tile::Food:
+            this->collect_food();
+            break;
+        case Tile::Snake:
+            this->game.decrease_lives();
+            break;
+        default:
             break;
     }
 
