@@ -56,11 +56,27 @@ void Snake::collect_portal() {
 
     this->update_color(SNAKE_COLOR_1);
     this->can_use_portal = true;
+    this->can_use_attack = false;
 }
 
 void Snake::on_portal_exit() {
     this->color = SNAKE_COLOR;
     this->can_use_portal = false;
+}
+
+void Snake::collect_attack() {
+    if (this->can_use_attack) {
+        return;
+    }
+
+    this->update_color(SNAKE_COLOR_2);
+    this->can_use_attack = true;
+    this->can_use_portal = false;
+}
+
+void Snake::on_attack_exit() {
+    this->update_color(SNAKE_COLOR);
+    this->can_use_attack = false;
 }
 
 void Snake::init(uint8_t start_x, uint8_t start_y) {
@@ -71,6 +87,9 @@ void Snake::init(uint8_t start_x, uint8_t start_y) {
     this->segments[0].x = start_x;
     this->segments[0].y = start_y;
     this->segments[0].dir = Direction::Right;
+
+    this->can_use_attack = false;
+    this->can_use_portal = false;
 
     this->color = SNAKE_COLOR;
 }
@@ -206,6 +225,7 @@ void Snake::loop() {
                 }
                 else {
                     this->game.decrease_lives();
+                    return;
                 }
             }
             else {
@@ -222,6 +242,7 @@ void Snake::loop() {
                 }
                 else {
                     this->game.decrease_lives();
+                    return;
                 }
             }
             else {
@@ -238,6 +259,7 @@ void Snake::loop() {
                 }
                 else {
                     this->game.decrease_lives();
+                    return;
                 }
             }
             else {
@@ -254,6 +276,7 @@ void Snake::loop() {
                 }
                 else {
                     this->game.decrease_lives();
+                    return;
                 }
             }
             else {
@@ -288,8 +311,11 @@ void Snake::loop() {
         case Tile::Food:
             this->collect_food();
             break;
-        case Tile::Portal:
+        case Tile::PortalPack:
             this->collect_portal();
+            break;
+        case Tile::AttackPack:
+            this->collect_attack();
             break;
         default:
             break;

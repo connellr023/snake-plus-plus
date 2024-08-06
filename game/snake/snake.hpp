@@ -37,6 +37,7 @@ private:
     uint32_t color;
 
     bool can_use_portal = false;
+    bool can_use_attack = false;
 
     void init(uint8_t start_x, uint8_t start_y);
     void foreach_segment(segment_iterator_t iter);
@@ -44,7 +45,9 @@ private:
     bool grow();
     void collect_food();
     void collect_portal();
+    void collect_attack();
     void on_portal_exit();
+    void on_attack_exit();
     void update_color(uint32_t color);
 
 public:

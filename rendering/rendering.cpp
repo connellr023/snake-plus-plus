@@ -73,8 +73,11 @@ void draw_tile(FrameBuffer &fb, Snake &snake, int tile_x, int tile_y, Tile tile)
         case Tile::Food:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, GROW_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
             break;
-        case Tile::Portal:
+        case Tile::PortalPack:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, PORTAL_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
+            break;
+        case Tile::AttackPack:
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ATTACK_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
             break;
         case Tile::Rock:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ROCK_COLOR, bg_color, SPRITE_ROCK, orientation_normal);

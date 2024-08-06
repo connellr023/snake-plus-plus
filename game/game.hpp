@@ -13,6 +13,7 @@
 
 #define FOOD_SPAWN_COUNT        3
 #define PORTAL_SPAWN_COUNT      2
+#define ATTACK_SPAWN_COUNT      1
 
 #define MIN_FOOD_LIFETIME       30
 #define MAX_FOOD_LIFETIME       45
@@ -20,12 +21,16 @@
 #define MIN_PORTAL_LIFETIME     30
 #define MAX_PORTAL_LIFETIME     45
 
+#define MIN_ATTACK_LIFETIME     22
+#define MAX_ATTACK_LIFETIME     27
+
 #define MIN_ROCKS               4
 #define MAX_ROCKS               6
 
 #define SNAKE_MOVE_MS           85
 #define FOOD_SPAWN_MS           4000
 #define PORTAL_SPAWN_MS         5000
+#define ATTACK_SPAWN_MS         2000
 #define LIFE_TILE_MS            120
 
 #define MAX_SNAKE_SIZE          100
@@ -36,7 +41,8 @@ typedef std::function<void()> interval_listener_t;
 enum class Tile {
     Empty,
     Food,
-    Portal,
+    PortalPack,
+    AttackPack,
     Rock,
     SnakeHead,
     SnakeSegmentHorizontal,

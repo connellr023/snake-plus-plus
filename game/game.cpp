@@ -103,7 +103,11 @@ void Game::init() {
     });
 
     this->register_interval_listener(PORTAL_SPAWN_MS, [this]() {
-        this->generate_lifetime_tile(Tile::Portal, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
+        this->generate_lifetime_tile(Tile::PortalPack, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
+    });
+
+    this->register_interval_listener(ATTACK_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
