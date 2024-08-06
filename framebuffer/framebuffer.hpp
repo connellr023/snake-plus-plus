@@ -47,8 +47,8 @@ public:
         return this->is_running;
     }
 
-    void set_running(bool running) {
-        this->is_running = running;
+    void set_running(bool is_running) {
+        this->is_running = is_running;
     }
 };
 
