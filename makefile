@@ -9,9 +9,10 @@ TARGET = build
 SRCS = \
     main.cpp \
     framebuffer/linux_framebuffer.cpp \
+    rendering/rendering.cpp \
     game/game.cpp \
     game/snake/snake.cpp \
-    rendering/rendering.cpp \
+    game/ghost/ghost.cpp \
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

@@ -2,6 +2,7 @@
 #include <cassert>
 #include <memory>
 #include "game.hpp"
+#include "ghost/ghost.hpp"
 #include "../rendering/rendering.hpp"
 #include "../rendering/sprites.hpp"
 #include "../rendering/colors.hpp"
@@ -43,28 +44,29 @@ void Game::generate_map() {
     const uint8_t rock_count = MIN_ROCKS + (rand() % (MAX_ROCKS - MIN_ROCKS));
 
     for (uint8_t i = 0; i < rock_count; i++) {
-        uint8_t x = rand() % this->grid_width;
-        uint8_t y = rand() % this->grid_height;
-
-        while (this->get_tile(x, y) != Tile::Empty) {
-            x = rand() % this->grid_width;
-            y = rand() % this->grid_height;
-        }
-
+        const auto [x, y] = this->generate_random_pos();
         this->set_tile(x, y, Tile::Rock);
     }
 }
 
+Vector2 Game::generate_random_pos() {
+    std::uniform_int_distribution<uint8_t> dist_x(0, this->grid_width - 1);
+    std::uniform_int_distribution<uint8_t> dist_y(0, this->grid_height - 1);
+
+    uint8_t x = dist_x(this->rng);
+    uint8_t y = dist_y(this->rng);
+
+    while (this->get_tile(x, y) != Tile::Empty) {
+        x = dist_x(this->rng);
+        y = dist_y(this->rng);
+    }
+
+    return { x, y };
+}
+
 void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime) {
-    uint8_t x = rand() % this->grid_width;
-    uint8_t y = rand() % this->grid_height;
-
     for (uint8_t i = 0; i < amount; i++) {
-        while (this->get_tile(x, y) != Tile::Empty) {
-            x = rand() % this->grid_width;
-            y = rand() % this->grid_height;
-        }
-
+        const auto [x, y] = this->generate_random_pos();
         const uint64_t lifetime = min_lifetime + (rand() % (max_lifetime - min_lifetime));
 
         this->set_tile(x, y, tile);
@@ -108,6 +110,11 @@ void Game::init() {
 
     this->register_interval_listener(ATTACK_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
+    });
+
+    this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
+        const auto [x, y] = this->generate_random_pos();
+        this->entities.insert(std::shared_ptr<Entity>(new Ghost(*this, x, y)));
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
@@ -161,6 +168,22 @@ void Game::loop() {
         if (interval_wrapper->last_interval_ms + interval_wrapper->interval_ms < millis) {
             interval_wrapper->listener();
             interval_wrapper->last_interval_ms = millis;
+        }
+    }
+
+    for (auto it = this->entities.begin(); it != this->entities.end();) {
+        auto entity = *it;
+
+        if (entity->get_last_update_ms() + entity->get_update_ms() < millis) {
+            entity->update();
+            entity->set_last_update_ms(millis);
+        }
+
+        if (!entity->get_is_alive()) {
+            it = this->entities.erase(it);
+        }
+        else {
+            it++;
         }
     }
 }

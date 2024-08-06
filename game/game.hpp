@@ -1,11 +1,13 @@
 #ifndef GAME_H
 #define GAME_H
 #include <cstdint>
+#include <random>
 #include <list>
 #include <set>
 #include <memory>
 #include <functional>
 #include "snake/snake.hpp"
+#include "entity/entity.hpp"
 #include "../framebuffer/impl.hpp"
 
 #define SNAKE_SPAWN_X           3
@@ -31,6 +33,7 @@
 #define FOOD_SPAWN_MS           4000
 #define PORTAL_SPAWN_MS         5000
 #define ATTACK_SPAWN_MS         2000
+#define GHOST_SPAWN_MS          12000
 #define LIFE_TILE_MS            120
 
 #define MAX_SNAKE_SIZE          100
@@ -44,6 +47,7 @@ enum class Tile {
     PortalPack,
     AttackPack,
     Rock,
+    Ghost,
     SnakeHead,
     SnakeSegmentHorizontal,
     SnakeSegmentVertical,
@@ -66,6 +70,11 @@ struct LifetimeTileWrapper {
     uint64_t life_left;
 };
 
+struct Vector2 {
+    uint8_t x;
+    uint8_t y;
+};
+
 class Game {
 private:
     FrameBufferImpl &fb;
@@ -74,10 +83,13 @@ private:
     int grid_height;
     int tick_ms;
 
+    std::mt19937 rng;
+
     std::unique_ptr<Tile[]> grid;
     std::unique_ptr<Snake> snake;
 
     std::set<std::shared_ptr<LifetimeTileWrapper>> lifetime_tiles;
+    std::set<std::shared_ptr<Entity>> entities;
 
     std::list<std::shared_ptr<IntervalListenerWrapper>> interval_listeners;
 
@@ -99,7 +111,8 @@ public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
         fb(fb),
         grid_width(grid_width),
-        grid_height(grid_height)
+        grid_height(grid_height),
+        rng(std::random_device{}())
     {
         this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
         this->snake = std::unique_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
@@ -122,6 +135,8 @@ public:
 
     void init();
     void loop();
+
+    Vector2 generate_random_pos();
 };
 
 #endif // GAME_H

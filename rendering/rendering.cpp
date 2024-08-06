@@ -82,6 +82,9 @@ void draw_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile t
         case Tile::Rock:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ROCK_COLOR, bg_color, SPRITE_ROCK, orientation_normal);
             break;
+        case Tile::Ghost:
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, GHOST_COLOR, bg_color, (tile_x + tile_y) % 2 == 0 ? SPRITE_GHOST_1 : SPRITE_GHOST_2, orientation_normal);
+            break;
         case Tile::SnakeHead:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_HEAD, get_orientation(snake.get_direction()));
             break;
