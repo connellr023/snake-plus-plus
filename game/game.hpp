@@ -39,6 +39,8 @@
 #define MAX_SNAKE_SIZE          100
 #define MAX_LIVES               10
 
+#define MAX_ENTITY_COUNT        10
+
 typedef std::function<void()> interval_listener_t;
 
 enum class Tile {
@@ -65,8 +67,8 @@ struct IntervalListenerWrapper {
 
 struct LifetimeTileWrapper {
     Tile tile;
-    uint8_t tile_x;
-    uint8_t tile_y;
+    uint8_t x;
+    uint8_t y;
     uint64_t life_left;
 };
 
@@ -104,6 +106,14 @@ private:
         }));
     }
 
+    void spawn_entity(std::shared_ptr<Entity> entity_ptr) {
+        if (entities.size() >= MAX_ENTITY_COUNT) {
+            return;
+        }
+
+        this->entities.insert(entity_ptr);
+    }
+
     void generate_map();
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
 
@@ -137,6 +147,8 @@ public:
     void loop();
 
     Vector2 generate_random_pos();
+
+    void kill_entity_at_pos(uint8_t x, uint8_t y);
 };
 
 #endif // GAME_H

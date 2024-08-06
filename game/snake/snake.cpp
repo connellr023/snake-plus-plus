@@ -75,6 +75,12 @@ void Snake::collect_attack() {
 }
 
 void Snake::on_attack_exit() {
+    for (uint8_t i = 0; i < GHOST_GROW_AMOUNT; i++) {
+        if (!this->grow()) {
+            break;
+        }
+    }
+
     this->update_color(SNAKE_COLOR);
     this->can_use_attack = false;
 }
@@ -294,6 +300,16 @@ void Snake::loop() {
     switch (this->game.get_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y)) {
         case Tile::Rock:
             write_back_tile = Tile::Rock;
+        case Tile::Ghost: {
+            if (this->can_use_attack) {
+                this->game.kill_entity_at_pos(this->segments[this->head_idx].x, this->segments[this->head_idx].y);
+                this->on_attack_exit();
+                break;
+            }
+            else {
+                write_back_tile = Tile::Ghost;
+            }
+        }
         case Tile::SnakeSegmentTopLeft:
         case Tile::SnakeSegmentTopRight:
         case Tile::SnakeSegmentBottomLeft:

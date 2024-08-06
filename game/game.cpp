@@ -64,16 +64,29 @@ Vector2 Game::generate_random_pos() {
     return { x, y };
 }
 
+void Game::kill_entity_at_pos(uint8_t x, uint8_t y) {
+    for (auto it = this->entities.begin(); it != this->entities.end(); it++) {
+        auto entity = *it;
+
+        if (entity->get_x() == x && entity->get_y() == y) {
+            it = this->entities.erase(it);
+            return;
+        }
+    }
+}
+
 void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime) {
     for (uint8_t i = 0; i < amount; i++) {
+        std::uniform_int_distribution<uint8_t> lifetime_dist(min_lifetime, max_lifetime);
+
         const auto [x, y] = this->generate_random_pos();
-        const uint64_t lifetime = min_lifetime + (rand() % (max_lifetime - min_lifetime));
+        const uint64_t lifetime = lifetime_dist(this->rng);
 
         this->set_tile(x, y, tile);
         this->lifetime_tiles.insert(std::shared_ptr<LifetimeTileWrapper>(new LifetimeTileWrapper {
             .tile = tile,
-            .tile_x = x,
-            .tile_y = y,
+            .x = x,
+            .y = y,
             .life_left = lifetime
         }));
     }
@@ -114,7 +127,7 @@ void Game::init() {
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
         const auto [x, y] = this->generate_random_pos();
-        this->entities.insert(std::shared_ptr<Entity>(new Ghost(*this, x, y)));
+        this->spawn_entity(std::shared_ptr<Entity>(new Ghost(*this, x, y)));
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
@@ -122,22 +135,22 @@ void Game::init() {
             auto lifetime_tile = *it;
             lifetime_tile->life_left--;
 
-            if (this->get_tile(lifetime_tile->tile_x, lifetime_tile->tile_y) != lifetime_tile->tile) {
+            if (this->get_tile(lifetime_tile->x, lifetime_tile->y) != lifetime_tile->tile) {
                 it = this->lifetime_tiles.erase(it);
                 continue;
             }
             else if (lifetime_tile->life_left <= 0) {
-                this->set_tile(lifetime_tile->tile_x, lifetime_tile->tile_y, Tile::Empty);
+                this->set_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
                 it = this->lifetime_tiles.erase(it);
                 continue;
             }
 
             if (lifetime_tile->life_left <= 10) {
                 if (lifetime_tile->life_left % 2 == 0) {
-                    draw_tile(this->fb, *this->snake, lifetime_tile->tile_x, lifetime_tile->tile_y, lifetime_tile->tile);
+                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, lifetime_tile->tile);
                 }
                 else {
-                    draw_tile(this->fb, *this->snake, lifetime_tile->tile_x, lifetime_tile->tile_y, Tile::Empty);
+                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, Tile::Empty);
                 }
             }
 

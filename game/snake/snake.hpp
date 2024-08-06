@@ -5,7 +5,8 @@
 #include <stdint.h>
 #include <functional>
 
-#define FOOD_GROW_AMOUNT    3
+#define FOOD_GROW_AMOUNT    2
+#define GHOST_GROW_AMOUNT   4
 
 class Game;
 
