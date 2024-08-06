@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 #include "snake/snake.hpp"
-#include "../framebuffer/framebuffer.hpp"
+#include "../framebuffer/impl.hpp"
 
 #define SNAKE_SPAWN_X           3
 #define SNAKE_SPAWN_Y           3
@@ -68,7 +68,7 @@ struct LifetimeTileWrapper {
 
 class Game {
 private:
-    FrameBuffer &fb;
+    FrameBufferImpl &fb;
 
     int grid_width;
     int grid_height;
@@ -96,7 +96,7 @@ private:
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
 
 public:
-    Game(FrameBuffer &fb, int grid_width, int grid_height) :
+    Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
         fb(fb),
         grid_width(grid_width),
         grid_height(grid_height)

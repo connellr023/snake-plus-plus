@@ -1,11 +1,10 @@
 #include <memory>
 #include "main.hpp"
 #include "keycodes.hpp"
-#include "framebuffer/framebuffer.hpp"
 #include "game/game.hpp"
 
 int main() {
-    std::shared_ptr<FrameBuffer> fb(create_frame_buffer(FB_WIDTH, FB_HEIGHT));
+    std::shared_ptr<FrameBufferImpl> fb(new FrameBufferImpl(FB_WIDTH, FB_HEIGHT));
     std::unique_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT));
 
     fb->create_window();
@@ -17,7 +16,7 @@ int main() {
     game->init();
 
     while (fb->should_run()) {
-        fb->handleEvents();
+        fb->handle_events();
         fb->render();
 
         game->loop();

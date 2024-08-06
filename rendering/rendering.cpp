@@ -46,7 +46,7 @@ uint32_t calc_bg_color(int tile_x, int tile_y) {
         : BACKGROUND_COLOR_2;
 }
 
-void draw_rect(FrameBuffer &fb, int x, int y, int width, int height, uint32_t color) {
+void draw_rect(FrameBufferImpl &fb, int x, int y, int width, int height, uint32_t color) {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             fb.write_pixel(x + j, y + i, color);
@@ -54,7 +54,7 @@ void draw_rect(FrameBuffer &fb, int x, int y, int width, int height, uint32_t co
     }
 }
 
-void draw_sprite(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation) {
+void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation) {
     for (uint8_t y = 0; y < 8; y++) {
         for (uint8_t x = 0; x < 8; x++) {
             const uint8_t bit = orientation(x, y, sprite);
@@ -63,7 +63,7 @@ void draw_sprite(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t 
     }
 }
 
-void draw_tile(FrameBuffer &fb, Snake &snake, int tile_x, int tile_y, Tile tile) {
+void draw_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile tile) {
     const int pixel_pos_x = tile_x * TILE_PIXELS;
     const int pixel_pos_y = tile_y * TILE_PIXELS;
 
@@ -109,7 +109,7 @@ void draw_tile(FrameBuffer &fb, Snake &snake, int tile_x, int tile_y, Tile tile)
     }
 }
 
-void draw_uint(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint8_t digits, uint16_t value) {
+void draw_uint(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint8_t digits, uint16_t value) {
     const static uint64_t number_sprites[] = {
         SPRITE_0,
         SPRITE_1,
@@ -140,10 +140,10 @@ void draw_uint(FrameBuffer &fb, int pixel_x, int pixel_y, int scale, uint32_t co
     }
 }
 
-void draw_ui_sprite(FrameBuffer &fb, int x, uint32_t color, uint64_t sprite) {
+void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite) {
     draw_sprite(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, sprite, orientation_normal);
 }
 
-void draw_ui_uint(FrameBuffer &fb, int x, uint32_t color, uint8_t digits, uint16_t value) {
+void draw_ui_uint(FrameBufferImpl &fb, int x, uint32_t color, uint8_t digits, uint16_t value) {
     draw_uint(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, digits, value);
 }
