@@ -39,6 +39,20 @@ void Game::generate_map() {
             this->set_tile(x, y, Tile::Empty);
         }
     }
+
+    const uint8_t rock_count = MIN_ROCKS + (rand() % (MAX_ROCKS - MIN_ROCKS));
+
+    for (uint8_t i = 0; i < rock_count; i++) {
+        uint8_t x = rand() % this->grid_width;
+        uint8_t y = rand() % this->grid_height;
+
+        while (this->get_tile(x, y) != Tile::Empty) {
+            x = rand() % this->grid_width;
+            y = rand() % this->grid_height;
+        }
+
+        this->set_tile(x, y, Tile::Rock);
+    }
 }
 
 void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime) {

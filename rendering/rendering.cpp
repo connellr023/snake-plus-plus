@@ -76,6 +76,9 @@ void draw_tile(FrameBuffer &fb, Snake &snake, int tile_x, int tile_y, Tile tile)
         case Tile::Portal:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, PORTAL_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
             break;
+        case Tile::Rock:
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ROCK_COLOR, bg_color, SPRITE_ROCK, orientation_normal);
+            break;
         case Tile::SnakeHead:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_HEAD, get_orientation(snake.get_direction()));
             break;

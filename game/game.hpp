@@ -20,6 +20,9 @@
 #define MIN_PORTAL_LIFETIME     30
 #define MAX_PORTAL_LIFETIME     45
 
+#define MIN_ROCKS               4
+#define MAX_ROCKS               6
+
 #define SNAKE_MOVE_MS           85
 #define FOOD_SPAWN_MS           4000
 #define PORTAL_SPAWN_MS         5000
@@ -34,6 +37,7 @@ enum class Tile {
     Empty,
     Food,
     Portal,
+    Rock,
     SnakeHead,
     SnakeSegmentHorizontal,
     SnakeSegmentVertical,

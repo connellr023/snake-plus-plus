@@ -81,13 +81,7 @@ void Snake::reset(uint8_t start_x, uint8_t start_y) {
         this->game.set_tile(segment->x, segment->y, Tile::Empty);
     });
 
-    // Reinitialize snake
     this->init(start_x, start_y);
-
-    // Weird hack to reset the snake properly
-    this->grow();
-    this->length--;
-
     this->game.set_score(0);
 }
 
@@ -270,17 +264,27 @@ void Snake::loop() {
         }
     }
 
+    // Tile to be written back to the grid after collision detection if the snake dies
+    Tile write_back_tile = Tile::Empty;
+
     // Collision detection
     switch (this->game.get_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y)) {
+        case Tile::Rock:
+            write_back_tile = Tile::Rock;
         case Tile::SnakeSegmentTopLeft:
         case Tile::SnakeSegmentTopRight:
         case Tile::SnakeSegmentBottomLeft:
         case Tile::SnakeSegmentBottomRight:
         case Tile::SnakeSegmentHorizontal:
         case Tile::SnakeSegmentVertical:
-        case Tile::SnakeHead:
+        case Tile::SnakeHead: {
+            const uint8_t head_x = this->segments[this->head_idx].x;
+            const uint8_t head_y = this->segments[this->head_idx].y;
+
             this->game.decrease_lives();
-            break;
+            this->game.set_tile(head_x, head_y, write_back_tile);
+            return;
+        }
         case Tile::Food:
             this->collect_food();
             break;
