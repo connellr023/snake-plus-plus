@@ -1,54 +1,43 @@
 #include "ghost.hpp"
 
-void Ghost::move(Direction dir) {
-    int new_x = this->x;
-    int new_y = this->y;
-
-    switch (dir) {
-        case Direction::Up: {
-            if (this->y == 0) {
-                return;
-            }
-
-            new_y--;
-            break;
-        }
-        case Direction::Down: {
-            if (this->y == this->game.get_grid_height() - 1) {
-                return;
-            }
-
-            new_y++;
-            break;
-        }
-        case Direction::Left: {
-            if (this->x == 0) {
-                return;
-            }
-
-            new_x--;
-            break;
-        }
-        case Direction::Right: {
-            if (this->x == this->game.get_grid_width() - 1) {
-                return;
-            }
-
-            new_x++;
-            break;
-        }
-    }
-
-    if (this->game.get_tile(new_x, new_y) != Tile::Empty) {
-        return;
-    }
-
-    this->game.set_tile(this->x, this->y, Tile::Empty);
-    this->x = new_x;
-    this->y = new_y;
-    this->game.set_tile(this->x, this->y, Tile::Ghost);
-}
-
 void Ghost::update() {
-    this->move(Direction::Right);
+    if (!this->path.empty()) {
+        PathNode current_node = this->pop_next_node();
+
+        switch (this->game.get_tile(current_node.pos.x, current_node.pos.y)) {
+            case Tile::SnakeHead: {
+                if (this->game.get_snake().can_attack()) {
+                    this->die();
+                    return;
+                }
+
+                break;
+            }
+            case Tile::SnakeSegmentTopLeft:
+            case Tile::SnakeSegmentTopRight:
+            case Tile::SnakeSegmentBottomLeft:
+            case Tile::SnakeSegmentBottomRight:
+            case Tile::SnakeSegmentHorizontal:
+            case Tile::SnakeSegmentVertical: {
+                this->recalculate_path();
+                return;
+            }
+            case Tile::Ghost: {
+                if (current_node.pos != Vector2 { this->x, this->y }) {
+                    this->path.clear();
+                    return;
+                }
+            }
+            default:
+                break;
+        }
+
+        this->game.set_tile(this->x, this->y, Tile::Empty);
+        this->x = current_node.pos.x;
+        this->y = current_node.pos.y;
+        this->game.set_tile(this->x, this->y, Tile::Ghost);
+    }
+    else {
+        this->recalculate_path();
+    }
 }

@@ -61,12 +61,16 @@ public:
     void reset(uint8_t start_x, uint8_t start_y);
     void set_direction(Direction dir);
 
-    Direction get_direction() const {
-        return this->segments[this->head_idx].dir;
+    Segment get_head_segment() const {
+        return this->segments[this->head_idx];
     }
 
     uint32_t get_color() const {
         return this->color;
+    }
+
+    bool can_attack() const {
+        return this->can_use_attack;
     }
 };
 

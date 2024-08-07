@@ -1,6 +1,11 @@
 #include <chrono>
 #include <cassert>
+#include <functional>
 #include <memory>
+#include <vector>
+#include <cmath>
+#include <queue>
+#include <unordered_map>
 #include "game.hpp"
 #include "ghost/ghost.hpp"
 #include "../rendering/rendering.hpp"
@@ -24,13 +29,13 @@ void Game::decrease_lives() {
 }
 
 void Game::set_tile(int x, int y, Tile tile) {
-    assert(x >= 0 && x < this->grid_width && y >= 0 && y < this->grid_height);
+    assert(this->is_within_grid(x, y));
     draw_tile(this->fb, *this->snake, x, y, tile);
     this->grid[y * this->grid_width + x] = tile;
 }
 
 Tile Game::get_tile(int x, int y) {
-    assert(x >= 0 && x < this->grid_width && y >= 0 && y < this->grid_height);
+    assert(this->is_within_grid(x, y));
     return this->grid[y * this->grid_width + x];
 }
 
@@ -64,17 +69,6 @@ Vector2 Game::generate_random_pos() {
     return { x, y };
 }
 
-void Game::kill_entity_at_pos(uint8_t x, uint8_t y) {
-    for (auto it = this->entities.begin(); it != this->entities.end(); it++) {
-        auto entity = *it;
-
-        if (entity->get_x() == x && entity->get_y() == y) {
-            it = this->entities.erase(it);
-            return;
-        }
-    }
-}
-
 void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime) {
     for (uint8_t i = 0; i < amount; i++) {
         std::uniform_int_distribution<uint8_t> lifetime_dist(min_lifetime, max_lifetime);
@@ -93,6 +87,16 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
 }
 
 void Game::init() {
+    // Initialize UI
+    draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
+    set_lives(MAX_LIVES);
+
+    draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
+    set_score(0);
+
+    // Initialize map
+    this->generate_map();
+
     this->fb.register_keypress_listener(KEY_UP, [this]() {
         this->snake->set_direction(Direction::Up);
     });
@@ -126,8 +130,10 @@ void Game::init() {
     });
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
-        const auto [x, y] = this->generate_random_pos();
-        this->spawn_entity(std::shared_ptr<Entity>(new Ghost(*this, x, y)));
+        this->lazily_spawn_entity([this]() {
+            const auto [x, y] = this->generate_random_pos();
+            return new Ghost(*this, x, y);
+        });
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
@@ -157,16 +163,6 @@ void Game::init() {
             it++;
         }
     });
-
-    // Initialize UI
-    draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
-    set_lives(MAX_LIVES);
-
-    draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
-    set_score(0);
-
-    // Initialize map
-    this->generate_map();
 }
 
 void Game::loop() {
@@ -199,4 +195,77 @@ void Game::loop() {
             it++;
         }
     }
+}
+
+std::vector<PathNode> Game::a_star(Vector2 start, Vector2 end, std::function<bool(Tile)> is_walkable) {
+    const static std::pair<int, int> directions[] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+
+    const static auto compare_path_node = [](std::shared_ptr<PathNode> a, std::shared_ptr<PathNode> b) {
+        return *a > *b;
+    };
+
+    const static auto calc_index = [this](Vector2 pos) {
+        return (pos.x * this->get_grid_width()) + pos.y;
+    };
+
+    std::priority_queue<std::shared_ptr<PathNode>, std::vector<std::shared_ptr<PathNode>>, decltype(compare_path_node)> open_set(compare_path_node);
+    std::unordered_map<int, std::shared_ptr<PathNode>> all_nodes;
+
+    auto start_node = std::make_shared<PathNode>(PathNode{
+        .parent = nullptr,
+        .pos = start,
+        .g_cost = 0,
+        .h_cost = static_cast<float>(start.manhattan_distance(end))
+    });
+
+    all_nodes[calc_index(start)] = start_node;
+    open_set.push(start_node);
+
+    while (!open_set.empty()) {
+        auto current_node = open_set.top();
+        open_set.pop();
+
+        if (current_node->pos == end) {
+            std::vector<PathNode> path;
+
+            while (current_node) {
+                path.push_back(*current_node);
+                current_node = current_node->parent;
+            }
+
+            return path;
+        }
+
+        for (const auto& dir : directions) {
+            Vector2 new_pos{
+                .x = static_cast<uint8_t>(current_node->pos.x + dir.first),
+                .y = static_cast<uint8_t>(current_node->pos.y + dir.second)
+            };
+
+            if (!this->is_within_grid(new_pos.x, new_pos.y)) {
+                continue;
+            }
+
+            if (!is_walkable(this->get_tile(new_pos.x, new_pos.y))) {
+                continue;
+            }
+
+            float new_g_cost = current_node->g_cost + 1;
+            int new_idx = calc_index(new_pos);
+
+            if (all_nodes.find(new_idx) == all_nodes.end() || new_g_cost < all_nodes[new_idx]->g_cost) {
+                auto new_node = std::shared_ptr<PathNode>(new PathNode{
+                    .parent = current_node,
+                    .pos = new_pos,
+                    .g_cost = new_g_cost,
+                    .h_cost = static_cast<float>(new_pos.manhattan_distance(end))
+                });
+
+                all_nodes[new_idx] = new_node;
+                open_set.push(new_node);
+            }
+        }
+    }
+
+    return {};
 }

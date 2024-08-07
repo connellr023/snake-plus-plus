@@ -33,23 +33,23 @@
 #define FOOD_SPAWN_MS           4000
 #define PORTAL_SPAWN_MS         5000
 #define ATTACK_SPAWN_MS         2000
-#define GHOST_SPAWN_MS          12000
+#define GHOST_SPAWN_MS          3000
 #define LIFE_TILE_MS            120
 
 #define MAX_SNAKE_SIZE          100
 #define MAX_LIVES               10
 
-#define MAX_ENTITY_COUNT        10
+#define MAX_ENTITY_COUNT        5
 
 typedef std::function<void()> interval_listener_t;
 
 enum class Tile {
-    Empty,
     Food,
     PortalPack,
     AttackPack,
-    Rock,
     Ghost,
+    Rock,
+    Empty,
     SnakeHead,
     SnakeSegmentHorizontal,
     SnakeSegmentVertical,
@@ -75,6 +75,35 @@ struct LifetimeTileWrapper {
 struct Vector2 {
     uint8_t x;
     uint8_t y;
+
+    int manhattan_distance(Vector2 other) const {
+        return abs(this->x - other.x) + abs(this->y - other.y);
+    }
+
+    bool operator==(const Vector2 &other) const {
+        return this->x == other.x && this->y == other.y;
+    }
+
+    bool operator!=(const Vector2 &other) const {
+        return !(*this == other);
+    }
+};
+
+struct PathNode {
+    std::shared_ptr<PathNode> parent;
+
+    Vector2 pos;
+
+    float g_cost;
+    float h_cost;
+
+    float f_cost() const {
+        return this->g_cost + this->h_cost;
+    }
+
+    bool operator>(const PathNode &other) const {
+        return this->f_cost() > other.f_cost();
+    }
 };
 
 class Game {
@@ -106,12 +135,12 @@ private:
         }));
     }
 
-    void spawn_entity(std::shared_ptr<Entity> entity_ptr) {
+    void lazily_spawn_entity(std::function<Entity *()> entity_spawner) {
         if (entities.size() >= MAX_ENTITY_COUNT) {
             return;
         }
 
-        this->entities.insert(entity_ptr);
+        this->entities.insert(std::shared_ptr<Entity>(entity_spawner()));
     }
 
     void generate_map();
@@ -126,6 +155,10 @@ public:
     {
         this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
         this->snake = std::unique_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
+    }
+
+    Snake &get_snake() {
+        return *this->snake;
     }
 
     void set_lives(uint8_t lives);
@@ -146,9 +179,13 @@ public:
     void init();
     void loop();
 
+    bool is_within_grid(uint8_t x, uint8_t y) const {
+        return x >= 0 && x < grid_width && y >= 0 && y < grid_height;
+    }
+
     Vector2 generate_random_pos();
 
-    void kill_entity_at_pos(uint8_t x, uint8_t y);
+    std::vector<PathNode> a_star(Vector2 start, Vector2 end, std::function<bool(Tile)> is_valid_tile);
 };
 
 #endif // GAME_H

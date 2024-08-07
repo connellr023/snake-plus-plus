@@ -300,15 +300,15 @@ void Snake::loop() {
     switch (this->game.get_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y)) {
         case Tile::Rock:
             write_back_tile = Tile::Rock;
+            goto case_dead;
         case Tile::Ghost: {
             if (this->can_use_attack) {
-                this->game.kill_entity_at_pos(this->segments[this->head_idx].x, this->segments[this->head_idx].y);
                 this->on_attack_exit();
                 break;
             }
-            else {
-                write_back_tile = Tile::Ghost;
-            }
+
+            write_back_tile = Tile::Ghost;
+            goto case_dead;
         }
         case Tile::SnakeSegmentTopLeft:
         case Tile::SnakeSegmentTopRight:
@@ -316,7 +316,8 @@ void Snake::loop() {
         case Tile::SnakeSegmentBottomRight:
         case Tile::SnakeSegmentHorizontal:
         case Tile::SnakeSegmentVertical:
-        case Tile::SnakeHead: {
+        case Tile::SnakeHead:
+        case_dead: {
             const uint8_t head_x = this->segments[this->head_idx].x;
             const uint8_t head_y = this->segments[this->head_idx].y;
 
