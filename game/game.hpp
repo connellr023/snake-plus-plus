@@ -39,7 +39,7 @@
 #define MAX_SNAKE_SIZE          100
 #define MAX_LIVES               10
 
-#define MAX_ENTITY_COUNT        5
+#define MAX_ENTITY_COUNT        6
 
 typedef std::function<void()> interval_listener_t;
 
@@ -76,33 +76,12 @@ struct Vector2 {
     uint8_t x;
     uint8_t y;
 
-    int manhattan_distance(Vector2 other) const {
-        return abs(this->x - other.x) + abs(this->y - other.y);
-    }
-
     bool operator==(const Vector2 &other) const {
         return this->x == other.x && this->y == other.y;
     }
 
     bool operator!=(const Vector2 &other) const {
         return !(*this == other);
-    }
-};
-
-struct PathNode {
-    std::shared_ptr<PathNode> parent;
-
-    Vector2 pos;
-
-    float g_cost;
-    float h_cost;
-
-    float f_cost() const {
-        return this->g_cost + this->h_cost;
-    }
-
-    bool operator>(const PathNode &other) const {
-        return this->f_cost() > other.f_cost();
     }
 };
 
@@ -183,9 +162,9 @@ public:
         return x >= 0 && x < grid_width && y >= 0 && y < grid_height;
     }
 
-    Vector2 generate_random_pos();
+    void kill_entity_at_pos(uint8_t x, uint8_t y);
 
-    std::vector<PathNode> a_star(Vector2 start, Vector2 end, std::function<bool(Tile)> is_valid_tile);
+    Vector2 generate_random_pos();
 };
 
 #endif // GAME_H
