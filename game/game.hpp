@@ -29,7 +29,6 @@
 #define MIN_ROCKS               4
 #define MAX_ROCKS               6
 
-#define SNAKE_MOVE_MS           85
 #define FOOD_SPAWN_MS           4000
 #define PORTAL_SPAWN_MS         5000
 #define ATTACK_SPAWN_MS         2000
@@ -96,7 +95,7 @@ private:
     std::mt19937 rng;
 
     std::unique_ptr<Tile[]> grid;
-    std::unique_ptr<Snake> snake;
+    std::shared_ptr<Snake> snake;
 
     std::set<std::shared_ptr<LifetimeTileWrapper>> lifetime_tiles;
     std::set<std::shared_ptr<Entity>> entities;
@@ -126,19 +125,7 @@ private:
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
 
 public:
-    Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
-        fb(fb),
-        grid_width(grid_width),
-        grid_height(grid_height),
-        rng(std::random_device{}())
-    {
-        this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
-        this->snake = std::unique_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
-    }
-
-    Snake &get_snake() {
-        return *this->snake;
-    }
+    Game(FrameBufferImpl &fb, int grid_width, int grid_height);
 
     void set_lives(uint8_t lives);
     void set_score(uint16_t score);
@@ -154,9 +141,7 @@ public:
     }
 
     void decrease_lives();
-
-    void init();
-    void loop();
+    void update();
 
     bool is_within_grid(uint8_t x, uint8_t y) const {
         return x >= 0 && x < grid_width && y >= 0 && y < grid_height;

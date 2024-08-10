@@ -138,7 +138,7 @@ void Snake::collect_food() {
     }
 }
 
-void Snake::loop() {
+void Snake::update() {
     const Direction dir = this->segments[this->head_idx].dir;
 
     if (this->length > 1) {

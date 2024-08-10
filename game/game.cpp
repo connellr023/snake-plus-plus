@@ -10,6 +10,91 @@
 #include "../rendering/colors.hpp"
 #include "../keycodes.hpp"
 
+Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
+    fb(fb),
+    grid_width(grid_width),
+    grid_height(grid_height),
+    rng(std::random_device{}())
+{
+    // Initialize UI
+    draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
+    set_lives(MAX_LIVES);
+
+    draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
+    set_score(0);
+
+    // Initialize map
+    this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
+    this->generate_map();
+
+    // Initialize snake
+    this->snake = std::shared_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
+    this->entities.insert(snake);
+
+    this->fb.register_keypress_listener(KEY_UP, [this]() {
+        this->snake->set_direction(Direction::Up);
+    });
+
+    this->fb.register_keypress_listener(KEY_DOWN, [this]() {
+        this->snake->set_direction(Direction::Down);
+    });
+
+    this->fb.register_keypress_listener(KEY_LEFT, [this]() {
+        this->snake->set_direction(Direction::Left);
+    });
+
+    this->fb.register_keypress_listener(KEY_RIGHT, [this]() {
+        this->snake->set_direction(Direction::Right);
+    });
+
+    this->register_interval_listener(FOOD_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::Food, FOOD_SPAWN_COUNT, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
+    });
+
+    this->register_interval_listener(PORTAL_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::PortalPack, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
+    });
+
+    this->register_interval_listener(ATTACK_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
+    });
+
+    this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
+        this->lazily_spawn_entity([this]() {
+            const auto [x, y] = this->generate_random_pos();
+            return new Ghost(*this, x, y);
+        });
+    });
+
+    this->register_interval_listener(LIFE_TILE_MS, [this]() {
+        for (auto it = this->lifetime_tiles.begin(); it != this->lifetime_tiles.end();) {
+            auto lifetime_tile = *it;
+            lifetime_tile->life_left--;
+
+            if (this->get_tile(lifetime_tile->x, lifetime_tile->y) != lifetime_tile->tile) {
+                it = this->lifetime_tiles.erase(it);
+                continue;
+            }
+            else if (lifetime_tile->life_left <= 0) {
+                this->set_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
+                it = this->lifetime_tiles.erase(it);
+                continue;
+            }
+
+            if (lifetime_tile->life_left <= 10) {
+                if (lifetime_tile->life_left % 2 == 0) {
+                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, lifetime_tile->tile);
+                }
+                else {
+                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, Tile::Empty);
+                }
+            }
+
+            it++;
+        }
+    });
+}
+
 void Game::set_lives(uint8_t lives) {
     this->lives = lives;
     draw_ui_uint(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
@@ -94,86 +179,7 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
     }
 }
 
-void Game::init() {
-    // Initialize UI
-    draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
-    set_lives(MAX_LIVES);
-
-    draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
-    set_score(0);
-
-    // Initialize map
-    this->generate_map();
-
-    this->fb.register_keypress_listener(KEY_UP, [this]() {
-        this->snake->set_direction(Direction::Up);
-    });
-
-    this->fb.register_keypress_listener(KEY_DOWN, [this]() {
-        this->snake->set_direction(Direction::Down);
-    });
-
-    this->fb.register_keypress_listener(KEY_LEFT, [this]() {
-        this->snake->set_direction(Direction::Left);
-    });
-
-    this->fb.register_keypress_listener(KEY_RIGHT, [this]() {
-        this->snake->set_direction(Direction::Right);
-    });
-
-    this->register_interval_listener(SNAKE_MOVE_MS, [this]() {
-        this->snake->loop();
-    });
-
-    this->register_interval_listener(FOOD_SPAWN_MS, [this]() {
-        this->generate_lifetime_tile(Tile::Food, FOOD_SPAWN_COUNT, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
-    });
-
-    this->register_interval_listener(PORTAL_SPAWN_MS, [this]() {
-        this->generate_lifetime_tile(Tile::PortalPack, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
-    });
-
-    this->register_interval_listener(ATTACK_SPAWN_MS, [this]() {
-        this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
-    });
-
-    this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
-        this->lazily_spawn_entity([this]() {
-            const auto [x, y] = this->generate_random_pos();
-            return new Ghost(*this, x, y);
-        });
-    });
-
-    this->register_interval_listener(LIFE_TILE_MS, [this]() {
-        for (auto it = this->lifetime_tiles.begin(); it != this->lifetime_tiles.end();) {
-            auto lifetime_tile = *it;
-            lifetime_tile->life_left--;
-
-            if (this->get_tile(lifetime_tile->x, lifetime_tile->y) != lifetime_tile->tile) {
-                it = this->lifetime_tiles.erase(it);
-                continue;
-            }
-            else if (lifetime_tile->life_left <= 0) {
-                this->set_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
-                it = this->lifetime_tiles.erase(it);
-                continue;
-            }
-
-            if (lifetime_tile->life_left <= 10) {
-                if (lifetime_tile->life_left % 2 == 0) {
-                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, lifetime_tile->tile);
-                }
-                else {
-                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, Tile::Empty);
-                }
-            }
-
-            it++;
-        }
-    });
-}
-
-void Game::loop() {
+void Game::update() {
     using milliseconds = std::chrono::milliseconds;
 
     auto now = std::chrono::high_resolution_clock::now();
