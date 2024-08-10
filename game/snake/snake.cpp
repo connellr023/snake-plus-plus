@@ -301,15 +301,15 @@ void Snake::loop() {
         case Tile::Rock:
             write_back_tile = Tile::Rock;
             goto case_dead;
-        case Tile::Ghost: {
-            if (this->can_use_attack) {
-                this->on_attack_exit();
-                break;
-            }
+        // case Tile::Ghost: {
+        //     if (this->can_use_attack) {
+        //         this->on_attack_exit();
+        //         break;
+        //     }
 
-            write_back_tile = Tile::Ghost;
-            goto case_dead;
-        }
+        //     write_back_tile = Tile::Ghost;
+        //     goto case_dead;
+        // }
         case Tile::SnakeSegmentTopLeft:
         case Tile::SnakeSegmentTopRight:
         case Tile::SnakeSegmentBottomLeft:

@@ -3,7 +3,7 @@
 #include "../game.hpp"
 #include "../entity/entity.hpp"
 
-#define GHOST_UPDATE_MS 85
+#define GHOST_UPDATE_MS 300
 
 class Ghost : public Entity {
 private:

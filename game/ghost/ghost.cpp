@@ -1,18 +1,33 @@
 #include "ghost.hpp"
 
 void Ghost::update() {
+    switch (this->game.get_tile(this->x, this->y)) {
+        case Tile::SnakeHead:
+        case Tile::SnakeSegmentTopLeft:
+        case Tile::SnakeSegmentTopRight:
+        case Tile::SnakeSegmentBottomLeft:
+        case Tile::SnakeSegmentBottomRight:
+        case Tile::SnakeSegmentHorizontal:
+        case Tile::SnakeSegmentVertical: {
+            if (this->game.get_snake().can_attack()) {
+                this->die();
+                return;
+            }
+            else {
+                this->game.get_snake().reset(10, 10);
+                return;
+            }
+
+            break;
+        }
+        default:
+            break;
+    }
+
     if (!this->path.empty()) {
         PathNode current_node = this->pop_next_node();
 
         switch (this->game.get_tile(current_node.pos.x, current_node.pos.y)) {
-            case Tile::SnakeHead: {
-                if (this->game.get_snake().can_attack()) {
-                    this->die();
-                    return;
-                }
-
-                break;
-            }
             case Tile::SnakeSegmentTopLeft:
             case Tile::SnakeSegmentTopRight:
             case Tile::SnakeSegmentBottomLeft:

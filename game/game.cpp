@@ -28,13 +28,13 @@ void Game::decrease_lives() {
     this->snake->reset(SNAKE_SPAWN_X, SNAKE_SPAWN_Y);
 }
 
-void Game::set_tile(int x, int y, Tile tile) {
+void Game::set_tile(uint8_t x, uint8_t y, Tile tile) {
     assert(this->is_within_grid(x, y));
     draw_tile(this->fb, *this->snake, x, y, tile);
     this->grid[y * this->grid_width + x] = tile;
 }
 
-Tile Game::get_tile(int x, int y) {
+Tile Game::get_tile(uint8_t x, uint8_t y) {
     assert(this->is_within_grid(x, y));
     return this->grid[y * this->grid_width + x];
 }
