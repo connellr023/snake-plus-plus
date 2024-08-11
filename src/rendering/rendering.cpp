@@ -79,6 +79,9 @@ void draw_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile t
         case Tile::AttackPack:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ATTACK_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
             break;
+        case Tile::StarPack:
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, STAR_ICON_COLOR, bg_color, SPRITE_STAR, orientation_normal);
+            break;
         case Tile::Rock:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ROCK_COLOR, bg_color, SPRITE_ROCK, orientation_normal);
             break;

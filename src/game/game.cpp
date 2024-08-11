@@ -59,6 +59,10 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
         this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
     });
 
+    this->register_interval_listener(STAR_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::StarPack, STAR_SPAWN_COUNT, MIN_STAR_LIFETIME, MAX_STAR_LIFETIME);
+    });
+
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
         this->lazily_spawn_entity([this]() {
             const auto [x, y] = this->generate_random_pos();

@@ -6,10 +6,11 @@
 #include <functional>
 #include "../entity/entity.hpp"
 
-#define SNAKE_UPDATE_MS     80
+#define SNAKE_UPDATE_MS         80
+#define STAR_SNAKE_UPDATE_MS    55
 
-#define FOOD_GROW_AMOUNT    2
-#define GHOST_GROW_AMOUNT   4
+#define FOOD_GROW_AMOUNT        2
+#define GHOST_GROW_AMOUNT       4
 
 class Game;
 
@@ -38,8 +39,9 @@ private:
     uint8_t max_length;
     uint32_t color;
 
-    bool can_use_portal = false;
-    bool can_use_attack = false;
+    bool can_use_portal;
+    bool can_use_attack;
+    bool in_star_mode;
 
     void init(uint8_t start_x, uint8_t start_y);
     void foreach_segment(segment_iterator_t iter);
@@ -48,8 +50,10 @@ private:
     void collect_food();
     void collect_portal();
     void collect_attack();
+    void collect_star();
     void on_portal_exit();
     void on_attack_exit();
+    void on_star_exit();
     void update_color(uint32_t color);
 
 public:

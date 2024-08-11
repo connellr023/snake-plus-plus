@@ -50,7 +50,7 @@ void Snake::update_color(uint32_t color) {
 }
 
 void Snake::collect_portal() {
-    if (this->can_use_portal) {
+    if (this->can_use_portal || this->in_star_mode) {
         return;
     }
 
@@ -60,12 +60,16 @@ void Snake::collect_portal() {
 }
 
 void Snake::on_portal_exit() {
+    if (this->in_star_mode) {
+        return;
+    }
+
     this->color = SNAKE_COLOR;
     this->can_use_portal = false;
 }
 
 void Snake::collect_attack() {
-    if (this->can_use_attack) {
+    if (this->can_use_attack || this->in_star_mode) {
         return;
     }
 
@@ -81,8 +85,35 @@ void Snake::on_attack_exit() {
         }
     }
 
+    if (this->in_star_mode) {
+        return;
+    }
+
     this->update_color(SNAKE_COLOR);
     this->can_use_attack = false;
+}
+
+void Snake::collect_star() {
+    if (this->in_star_mode) {
+        this->on_star_exit();
+        return;
+    }
+
+    this->update_color(STAR_ICON_COLOR);
+
+    this->in_star_mode = true;
+    this->can_use_attack = true;
+    this->can_use_portal = true;
+    this->update_ms = STAR_SNAKE_UPDATE_MS;
+}
+
+void Snake::on_star_exit() {
+    this->update_color(SNAKE_COLOR);
+
+    this->in_star_mode = false;
+    this->can_use_attack = false;
+    this->can_use_portal = false;
+    this->update_ms = SNAKE_UPDATE_MS;
 }
 
 void Snake::init(uint8_t start_x, uint8_t start_y) {
@@ -90,14 +121,16 @@ void Snake::init(uint8_t start_x, uint8_t start_y) {
     this->head_idx = 0;
     this->tail_idx = 0;
 
-    this->segments[0].x = start_x;
-    this->segments[0].y = start_y;
-    this->segments[0].dir = Direction::Right;
+    this->segments[this->head_idx].x = start_x;
+    this->segments[this->head_idx].y = start_y;
+    this->segments[this->head_idx].dir = Direction::Right;
 
     this->can_use_attack = false;
     this->can_use_portal = false;
+    this->in_star_mode = false;
 
     this->color = SNAKE_COLOR;
+    this->update_ms = SNAKE_UPDATE_MS;
 }
 
 void Snake::reset(uint8_t start_x, uint8_t start_y) {
@@ -324,6 +357,7 @@ void Snake::update() {
 
             this->game.decrease_lives();
             this->game.set_tile(head_x, head_y, write_back_tile);
+
             return;
         }
         case Tile::Food:
@@ -334,6 +368,9 @@ void Snake::update() {
             break;
         case Tile::AttackPack:
             this->collect_attack();
+            break;
+        case Tile::StarPack:
+            this->collect_star();
             break;
         default:
             break;
