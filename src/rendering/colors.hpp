@@ -2,7 +2,7 @@
 #define COLORS_H
 
 #define BACKGROUND_COLOR_1      0x000000
-#define BACKGROUND_COLOR_2      0x060606
+#define BACKGROUND_COLOR_2      0x131313
 #define SNAKE_COLOR             0x36D161
 #define SNAKE_COLOR_1           0x44CBDB
 #define SNAKE_COLOR_2           0xE81522

@@ -7,12 +7,12 @@ TARGET = build
 
 # Source files
 SRCS = \
-    main.cpp \
-    framebuffer/linux_framebuffer.cpp \
-    rendering/rendering.cpp \
-    game/game.cpp \
-    game/snake/snake.cpp \
-    game/ghost/ghost.cpp \
+    src/main.cpp \
+    src/framebuffer/linux_framebuffer.cpp \
+    src/rendering/rendering.cpp \
+    src/game/game.cpp \
+    src/game/snake/snake.cpp \
+    src/game/ghost/ghost.cpp \
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
