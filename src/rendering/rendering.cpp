@@ -40,10 +40,15 @@ bit_extractor_t get_orientation(Direction dir) {
     return orientation;
 }
 
-uint32_t calc_bg_color(int tile_x, int tile_y) {
-    return (tile_x + tile_y) % 2 == 0
+uint32_t calc_bg_color(uint8_t x, uint8_t y) {
+    return (x + y) % 2 == 0
         ? BACKGROUND_COLOR_1
         : BACKGROUND_COLOR_2;
+}
+
+uint32_t calc_gradient_color(uint8_t x, uint8_t y, uint8_t width) {
+    const float hue = static_cast<float>(x) / static_cast<float>(width);
+    return hsv_to_rgb(hue, 1, 1);
 }
 
 void draw_rect(FrameBufferImpl &fb, int x, int y, int width, int height, uint32_t color) {
@@ -152,4 +157,30 @@ void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite)
 
 void draw_ui_uint(FrameBufferImpl &fb, int x, uint32_t color, uint8_t digits, uint16_t value) {
     draw_uint(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, digits, value);
+}
+
+uint32_t hsv_to_rgb(float h, float s, float v) {
+    int i = static_cast<int>(h * 6);
+
+    float r, g, b;
+    float f = (h * 6) - i;
+    float p = v * (1 - s);
+    float q = v * (1 - (f * s));
+    float t = v * (1 - ((1 - f) * s));
+
+    i = i % 6;
+
+    switch (i) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+        default: r = g = b = 0; break;
+    }
+
+    return  (static_cast<uint32_t>(r * 255) << 16) |
+            (static_cast<uint32_t>(g * 255) << 8)  |
+            (static_cast<uint32_t>(b * 255));
 }
