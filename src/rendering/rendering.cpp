@@ -3,6 +3,10 @@
 #include "colors.hpp"
 #include "sprites.hpp"
 
+constexpr uint8_t rainbow_pack_sprite_layers = 3;
+const static uint64_t rainbow_pack_sprites[rainbow_pack_sprite_layers] = { SPRITE_VALUE_PACK, SPRITE_VALUE_PACK_INNER_1, SPRITE_VALUE_PACK_INNER_2 };
+const static uint32_t rainbow_pack_colors[rainbow_pack_sprite_layers] = { RAINBOW_PACK_COLOR_1, RAINBOW_PACK_COLOR_2, RAINBOW_PACK_COLOR_3 };
+
 const static bit_extractor_t orientation_normal = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
     return (sprite >> ((7 - y) * 8 + (7 - x))) & 1;
 };
@@ -62,12 +66,28 @@ void draw_rect(FrameBufferImpl &fb, int x, int y, int width, int height, uint32_
     }
 }
 
-void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation) {
+void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation, bool is_transparent) {
     for (uint8_t y = 0; y < 8; y++) {
         for (uint8_t x = 0; x < 8; x++) {
             const uint8_t bit = orientation(x, y, sprite);
+
+            if (is_transparent && !bit) {
+                continue;
+            }
+
             draw_rect(fb, pixel_x + (x * scale), pixel_y + (y * scale), scale, scale, bit ? color : bg_color);
         }
+    }
+}
+
+template<int amount>
+void draw_layered_sprites(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t bg_color, bit_extractor_t orientation, const uint64_t sprites[amount], const uint32_t colors[amount]) {
+    // Draw the first sprite that is not transparent
+    draw_sprite(fb, pixel_x, pixel_y, scale, colors[0], bg_color, sprites[0], orientation);
+
+    // Draw the rest of the sprites on top of the first one
+    for (int i = 1; i < amount; i++) {
+        draw_sprite(fb, pixel_x, pixel_y, scale, colors[i], bg_color, sprites[i], orientation, true);
     }
 }
 
@@ -88,7 +108,7 @@ void draw_tile(FrameBufferImpl &fb, int tile_x, int tile_y, Tile tile) {
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ATTACK_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
             break;
         case Tile::StarPack:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, STAR_ICON_COLOR, bg_color, SPRITE_STAR, orientation_normal);
+            draw_layered_sprites<rainbow_pack_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_normal, rainbow_pack_sprites, rainbow_pack_colors);
             break;
         case Tile::Rock:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ROCK_COLOR, bg_color, SPRITE_ROCK, orientation_normal);
@@ -100,7 +120,6 @@ void draw_tile(FrameBufferImpl &fb, int tile_x, int tile_y, Tile tile) {
             draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, bg_color);
             break;
         default:
-            assert(tile <= Tile::SnakeHead);
             break;
     }
 }
@@ -137,7 +156,6 @@ void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, 
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Right));
             break;
         default:
-            assert(tile >= Tile::SnakeHead && tile <= Tile::SnakeSegmentTopRight);
             break;
     }
 }

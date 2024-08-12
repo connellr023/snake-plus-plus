@@ -48,7 +48,7 @@ private:
 
     bool can_use_portal;
     bool can_use_attack;
-    bool in_star_mode;
+    bool in_rainbow_mode;
 
     void init(uint8_t start_x, uint8_t start_y);
     void foreach_segment(segment_iterator_t iter);
@@ -57,10 +57,10 @@ private:
     void collect_food();
     void collect_portal();
     void collect_attack();
-    void collect_star();
+    void collect_rainbow();
     void on_portal_exit();
     void on_attack_exit();
-    void on_star_exit();
+    void on_rainbow_exit();
     void update_color(SnakeColor color);
 
 public:

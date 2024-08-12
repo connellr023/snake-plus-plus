@@ -18,4 +18,8 @@
 #define CLOCK_ICON_COLOR        0x61F7FF
 #define STAR_ICON_COLOR         0xFFCF21
 
+#define RAINBOW_PACK_COLOR_1       0xFC0320
+#define RAINBOW_PACK_COLOR_2       0xFC9803
+#define RAINBOW_PACK_COLOR_3       0xE8FC03
+
 #endif // COLORS_H

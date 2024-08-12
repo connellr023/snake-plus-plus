@@ -50,7 +50,7 @@ void Snake::update_color(SnakeColor color) {
 }
 
 void Snake::collect_portal() {
-    if (this->can_use_portal || this->in_star_mode) {
+    if (this->can_use_portal || this->in_rainbow_mode) {
         return;
     }
 
@@ -60,7 +60,7 @@ void Snake::collect_portal() {
 }
 
 void Snake::on_portal_exit() {
-    if (this->in_star_mode) {
+    if (this->in_rainbow_mode) {
         return;
     }
 
@@ -69,7 +69,7 @@ void Snake::on_portal_exit() {
 }
 
 void Snake::collect_attack() {
-    if (this->can_use_attack || this->in_star_mode) {
+    if (this->can_use_attack || this->in_rainbow_mode) {
         return;
     }
 
@@ -85,7 +85,7 @@ void Snake::on_attack_exit() {
         }
     }
 
-    if (this->in_star_mode) {
+    if (this->in_rainbow_mode) {
         return;
     }
 
@@ -93,22 +93,22 @@ void Snake::on_attack_exit() {
     this->can_use_attack = false;
 }
 
-void Snake::collect_star() {
-    if (this->in_star_mode) {
-        this->on_star_exit();
+void Snake::collect_rainbow() {
+    if (this->in_rainbow_mode) {
+        this->on_rainbow_exit();
         return;
     }
 
     this->update_color(SnakeColor::Rainbow);
-    this->in_star_mode = true;
+    this->in_rainbow_mode = true;
     this->can_use_attack = true;
     this->can_use_portal = true;
     this->update_ms = STAR_SNAKE_UPDATE_MS;
 }
 
-void Snake::on_star_exit() {
+void Snake::on_rainbow_exit() {
     this->update_color(SnakeColor::Normal);
-    this->in_star_mode = false;
+    this->in_rainbow_mode = false;
     this->can_use_attack = false;
     this->can_use_portal = false;
     this->update_ms = SNAKE_UPDATE_MS;
@@ -125,7 +125,7 @@ void Snake::init(uint8_t start_x, uint8_t start_y) {
 
     this->can_use_attack = false;
     this->can_use_portal = false;
-    this->in_star_mode = false;
+    this->in_rainbow_mode = false;
 
     this->color = SnakeColor::Normal;
     this->update_ms = SNAKE_UPDATE_MS;
@@ -371,7 +371,7 @@ void Snake::update() {
             this->collect_attack();
             break;
         case Tile::StarPack:
-            this->collect_star();
+            this->collect_rainbow();
             break;
         default:
             break;
