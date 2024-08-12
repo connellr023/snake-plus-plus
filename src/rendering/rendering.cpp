@@ -46,8 +46,11 @@ uint32_t calc_bg_color(uint8_t x, uint8_t y) {
         : BACKGROUND_COLOR_2;
 }
 
-uint32_t calc_gradient_color(uint8_t x, uint8_t y, uint8_t width) {
-    const float hue = static_cast<float>(x) / static_cast<float>(width);
+uint32_t calc_gradient_color(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    const float hue_x = static_cast<float>(x) / static_cast<float>(width);
+    const float hue_y = static_cast<float>(y) / static_cast<float>(height);
+    const float hue = (hue_x + hue_y) / 2;
+
     return hsv_to_rgb(hue, 1, 1);
 }
 
@@ -73,6 +76,9 @@ void draw_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile t
     const int pixel_pos_y = tile_y * TILE_PIXELS;
 
     const uint32_t bg_color = calc_bg_color(tile_x, tile_y);
+    const uint32_t snake_color = snake.get_color() == SnakeColor::Rainbow
+        ? calc_gradient_color(tile_x, tile_y, 25, 25)
+        : static_cast<uint32_t>(snake.get_color());
 
     switch (tile) {
         case Tile::Food:
@@ -94,25 +100,25 @@ void draw_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile t
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, GHOST_COLOR, bg_color, (tile_x + tile_y) % 2 == 0 ? SPRITE_GHOST_1 : SPRITE_GHOST_2, orientation_normal);
             break;
         case Tile::SnakeHead:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_HEAD, get_orientation(snake.get_head_segment().dir));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_HEAD, get_orientation(snake.get_head_segment().dir));
             break;
         case Tile::SnakeSegmentVertical:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_BODY, get_orientation(Direction::Up));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_BODY, get_orientation(Direction::Up));
             break;
         case Tile::SnakeSegmentHorizontal:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_BODY, get_orientation(Direction::Right));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_BODY, get_orientation(Direction::Right));
             break;
         case Tile::SnakeSegmentTopLeft:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Left));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Left));
             break;
         case Tile::SnakeSegmentTopRight:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Up));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Up));
             break;
         case Tile::SnakeSegmentBottomLeft:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Down));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Down));
             break;
         case Tile::SnakeSegmentBottomRight:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake.get_color(), bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Right));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_color, bg_color, SPRITE_SNAKE_CORNER, get_orientation(Direction::Right));
             break;
         default:
             draw_rect(fb, pixel_pos_x, pixel_pos_y, TILE_PIXELS, TILE_PIXELS, bg_color);

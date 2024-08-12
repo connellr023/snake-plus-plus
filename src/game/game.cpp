@@ -23,13 +23,13 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
     set_score(0);
 
-    // Initialize map
-    this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
-    this->generate_map();
-
     // Initialize snake
     this->snake = std::shared_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
     this->entities.insert(snake);
+
+    // Initialize map
+    this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
+    this->generate_map();
 
     this->fb.register_keypress_listener(KEY_UP, [this]() {
         this->snake->set_direction(Direction::Up);

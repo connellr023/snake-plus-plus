@@ -17,7 +17,7 @@
 typedef std::function<uint8_t(uint8_t, uint8_t, uint64_t)> bit_extractor_t;
 
 uint32_t calc_bg_color(uint8_t x, uint8_t y);
-uint32_t calc_gradient_color(uint8_t x, uint8_t y, uint8_t width);
+uint32_t calc_gradient_color(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 
 void draw_rect(FrameBufferImpl &fb, int x, int y, int width, int height, uint32_t color);
 void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation);

@@ -3,9 +3,6 @@
 
 #define BACKGROUND_COLOR_1      0x000000
 #define BACKGROUND_COLOR_2      0x131313
-#define SNAKE_COLOR             0x36D161
-#define SNAKE_COLOR_1           0x44CBDB
-#define SNAKE_COLOR_2           0xE81522
 #define ROCK_COLOR              0xDEDEDE
 #define GHOST_COLOR             0x95ADC7
 #define GROW_PACK_COLOR         0xFF00F3

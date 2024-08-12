@@ -21,6 +21,13 @@ enum class Direction {
     Right
 };
 
+enum class SnakeColor : uint32_t {
+    Normal = 0x36D161,
+    Portal = 0x44CBDB,
+    Attack = 0xE81522,
+    Rainbow
+};
+
 struct Segment {
     uint8_t x;
     uint8_t y;
@@ -37,7 +44,7 @@ private:
     uint8_t tail_idx;
     uint8_t length;
     uint8_t max_length;
-    uint32_t color;
+    SnakeColor color;
 
     bool can_use_portal;
     bool can_use_attack;
@@ -54,10 +61,14 @@ private:
     void on_portal_exit();
     void on_attack_exit();
     void on_star_exit();
-    void update_color(uint32_t color);
+    void update_color(SnakeColor color);
 
 public:
-    Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) : Entity(game, start_x, start_y, SNAKE_UPDATE_MS), max_length(max_length) {
+    Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) :
+        Entity(game, start_x, start_y, SNAKE_UPDATE_MS),
+        max_length(max_length),
+        color(SnakeColor::Normal)
+    {
         this->segments = std::make_unique<Segment[]>(max_length);
         this->init(start_x, start_y);
     }
@@ -70,7 +81,7 @@ public:
         return this->segments[this->head_idx];
     }
 
-    uint32_t get_color() const {
+    SnakeColor get_color() const {
         return this->color;
     }
 
