@@ -81,16 +81,18 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
             }
             else if (lifetime_tile->life_left <= 0) {
                 this->set_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
+                this->render_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
+
                 it = this->lifetime_tiles.erase(it);
                 continue;
             }
 
             if (lifetime_tile->life_left <= 10) {
                 if (lifetime_tile->life_left % 2 == 0) {
-                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, lifetime_tile->tile);
+                    this->render_tile(lifetime_tile->x, lifetime_tile->y, lifetime_tile->tile);
                 }
                 else {
-                    draw_tile(this->fb, *this->snake, lifetime_tile->x, lifetime_tile->y, Tile::Empty);
+                    this->render_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
                 }
             }
 
@@ -114,9 +116,18 @@ void Game::decrease_lives() {
     this->snake->reset(SNAKE_SPAWN_X, SNAKE_SPAWN_Y);
 }
 
+void Game::render_tile(uint8_t x, uint8_t y, Tile tile) {
+    assert(this->is_within_grid(x, y));
+    draw_tile(this->fb, x, y, tile);
+}
+
+void Game::render_snake_tile(uint8_t x, uint8_t y, Tile tile) {
+    assert(this->is_within_grid(x, y));
+    draw_snake_tile(this->fb, *this->snake, x, y, tile);
+}
+
 void Game::set_tile(uint8_t x, uint8_t y, Tile tile) {
     assert(this->is_within_grid(x, y));
-    draw_tile(this->fb, *this->snake, x, y, tile);
     this->grid[y * this->grid_width + x] = tile;
 }
 
@@ -129,6 +140,7 @@ void Game::generate_map() {
     for (int y = 0; y < this->grid_height; y++) {
         for (int x = 0; x < this->grid_width; x++) {
             this->set_tile(x, y, Tile::Empty);
+            this->render_tile(x, y, Tile::Empty);
         }
     }
 
@@ -137,6 +149,7 @@ void Game::generate_map() {
     for (uint8_t i = 0; i < rock_count; i++) {
         const auto [x, y] = this->generate_random_pos();
         this->set_tile(x, y, Tile::Rock);
+        this->render_tile(x, y, Tile::Rock);
     }
 }
 
@@ -174,6 +187,8 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
         const uint64_t lifetime = lifetime_dist(this->rng);
 
         this->set_tile(x, y, tile);
+        this->render_tile(x, y, tile);
+
         this->lifetime_tiles.insert(std::shared_ptr<LifetimeTileWrapper>(new LifetimeTileWrapper {
             .tile = tile,
             .x = x,

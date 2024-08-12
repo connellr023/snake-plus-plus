@@ -2,7 +2,7 @@
 #define COLORS_H
 
 #define BACKGROUND_COLOR_1      0x000000
-#define BACKGROUND_COLOR_2      0x131313
+#define BACKGROUND_COLOR_2      0x0E0E0E
 #define ROCK_COLOR              0xDEDEDE
 #define GHOST_COLOR             0x95ADC7
 #define GROW_PACK_COLOR         0xFF00F3

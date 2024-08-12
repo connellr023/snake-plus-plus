@@ -22,7 +22,8 @@ uint32_t calc_gradient_color(uint8_t x, uint8_t y, uint8_t width, uint8_t height
 void draw_rect(FrameBufferImpl &fb, int x, int y, int width, int height, uint32_t color);
 void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint64_t sprite, bit_extractor_t orientation);
 void draw_uint(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint8_t digits, uint16_t value);
-void draw_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile tile);
+void draw_tile(FrameBufferImpl &fb, int tile_x, int tile_y, Tile tile);
+void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile tile);
 
 void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite);
 void draw_ui_uint(FrameBufferImpl &fb, int x, uint32_t color, uint8_t digits, uint16_t value);

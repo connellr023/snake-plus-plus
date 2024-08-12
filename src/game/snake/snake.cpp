@@ -26,7 +26,7 @@ void Snake::set_direction(Direction dir) {
 }
 
 void Snake::foreach_segment(segment_iterator_t iter) {
-    uint8_t idx = this->head_idx;
+    uint8_t idx = (this->head_idx - 1 + this->max_length) % this->max_length;
 
     // Iterate until tail is reached
     while (true) {
@@ -45,7 +45,7 @@ void Snake::update_color(SnakeColor color) {
 
     this->foreach_segment([this](Segment *segment) {
         // Re-render segment with new color
-        this->game.set_tile(segment->x, segment->y, this->game.get_tile(segment->x, segment->y));
+        this->game.render_snake_tile(segment->x, segment->y, this->game.get_tile(segment->x, segment->y));
     });
 }
 
@@ -135,6 +135,7 @@ void Snake::reset(uint8_t start_x, uint8_t start_y) {
     // Clear snake from grid
     this->foreach_segment([this](Segment *segment) {
         this->game.set_tile(segment->x, segment->y, Tile::Empty);
+        this->game.render_tile(segment->x, segment->y, Tile::Empty);
     });
 
     this->init(start_x, start_y);
@@ -240,6 +241,7 @@ void Snake::update() {
         }
 
         this->game.set_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y, new_segment);
+        this->game.render_snake_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y, new_segment);
     }
 
     // Update head index
@@ -355,6 +357,7 @@ void Snake::update() {
 
             this->game.decrease_lives();
             this->game.set_tile(head_x, head_y, write_back_tile);
+            this->game.render_tile(head_x, head_y, write_back_tile);
 
             return;
         }
@@ -376,9 +379,11 @@ void Snake::update() {
 
     // Render changes
     this->game.set_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y, Tile::SnakeHead);
+    this->game.render_snake_tile(this->segments[this->head_idx].x, this->segments[this->head_idx].y, Tile::SnakeHead);
 
     // Clear previous tail position
     this->game.set_tile(this->segments[this->tail_idx].x, this->segments[this->tail_idx].y, Tile::Empty);
+    this->game.render_tile(this->segments[this->tail_idx].x, this->segments[this->tail_idx].y, Tile::Empty);
 
     // Update tail index
     this->tail_idx = (this->tail_idx + 1) % this->max_length;

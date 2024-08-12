@@ -135,6 +135,9 @@ public:
 
     void set_lives(uint8_t lives);
     void set_score(uint16_t score);
+
+    void render_tile(uint8_t x, uint8_t y, Tile tile);
+    void render_snake_tile(uint8_t x, uint8_t y, Tile tile);
     void set_tile(uint8_t x, uint8_t y, Tile tile);
     Tile get_tile(uint8_t x, uint8_t y);
 

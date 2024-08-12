@@ -38,8 +38,12 @@ void Ghost::update() {
     }
     else {
         this->game.set_tile(this->x, this->y, Tile::Empty);
+        this->game.render_tile(this->x, this->y, Tile::Empty);
+
         this->x = next_x;
         this->y = next_y;
+
         this->game.set_tile(this->x, this->y, Tile::Ghost);
+        this->game.render_tile(this->x, this->y, Tile::Ghost);
     }
 }
