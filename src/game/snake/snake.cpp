@@ -374,8 +374,11 @@ void Snake::update() {
         case Tile::AttackPack:
             this->collect_attack();
             break;
-        case Tile::StarPack:
+        case Tile::RainbowPack:
             this->collect_rainbow();
+            break;
+        case Tile::HeartPack:
+            this->game.increment_lives();
             break;
         default:
             break;

@@ -59,8 +59,12 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
         this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
     });
 
-    this->register_interval_listener(STAR_SPAWN_MS, [this]() {
-        this->generate_lifetime_tile(Tile::StarPack, STAR_SPAWN_COUNT, MIN_STAR_LIFETIME, MAX_STAR_LIFETIME);
+    this->register_interval_listener(RAINBOW_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::RainbowPack, RAINBOW_SPAWN_COUNT, MIN_RAINBOW_LIFETIME, MAX_RAINBOW_LIFETIME);
+    });
+
+    this->register_interval_listener(HEART_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::HeartPack, HEART_SPAWN_COUNT, MIN_HEART_LIFETIME, MAX_HEART_LIFETIME);
     });
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
@@ -114,6 +118,10 @@ void Game::set_score(uint16_t score) {
 void Game::decrease_lives() {
     this->set_lives(this->lives - 1);
     this->snake->reset(SNAKE_SPAWN_X, SNAKE_SPAWN_Y);
+}
+
+void Game::increment_lives() {
+    this->set_lives(this->lives + 1);
 }
 
 void Game::render_tile(uint8_t x, uint8_t y, Tile tile) {

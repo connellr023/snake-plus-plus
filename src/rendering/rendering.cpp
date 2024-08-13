@@ -27,7 +27,7 @@ const static bit_extractor_t orientation_rotated_270 = [](uint8_t x, uint8_t y, 
     return (sprite >> (x * 8 + (7 - y))) & 1;
 };
 
-bit_extractor_t get_orientation(Direction dir) {
+bit_extractor_t orientation_from_dir(Direction dir) {
     bit_extractor_t orientation;
 
     switch (dir) {
@@ -111,8 +111,11 @@ void draw_tile(FrameBufferImpl &fb, int tile_x, int tile_y, Tile tile) {
         case Tile::AttackPack:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ATTACK_PACK_COLOR, bg_color, SPRITE_VALUE_PACK, orientation_normal);
             break;
-        case Tile::StarPack:
+        case Tile::RainbowPack:
             draw_layered_sprites<rainbow_pack_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_normal, rainbow_pack_sprites, rainbow_pack_colors);
+            break;
+        case Tile::HeartPack:
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, HEART_ICON_COLOR, bg_color, SPRITE_HEART, orientation_normal);
             break;
         case Tile::Rock:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ROCK_COLOR, bg_color, SPRITE_ROCK, orientation_normal);
@@ -145,25 +148,25 @@ void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, 
 
     switch (tile) {
         case Tile::SnakeHead:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_body_color, bg_color, SPRITE_SNAKE_HEAD, get_orientation(snake.get_head_segment().dir));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_body_color, bg_color, SPRITE_SNAKE_HEAD, orientation_from_dir(snake.get_head_segment().dir));
             break;
         case Tile::SnakeSegmentVertical:
-            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, get_orientation(Direction::Up), snake_body_sprites, snake_segment_colors);
+            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_from_dir(Direction::Up), snake_body_sprites, snake_segment_colors);
             break;
         case Tile::SnakeSegmentHorizontal:
-            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, get_orientation(Direction::Right), snake_body_sprites, snake_segment_colors);
+            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_from_dir(Direction::Right), snake_body_sprites, snake_segment_colors);
             break;
         case Tile::SnakeSegmentTopLeft:
-            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, get_orientation(Direction::Left), snake_corner_sprites, snake_segment_colors);
+            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_from_dir(Direction::Left), snake_corner_sprites, snake_segment_colors);
             break;
         case Tile::SnakeSegmentTopRight:
-            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, get_orientation(Direction::Up), snake_corner_sprites, snake_segment_colors);
+            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_from_dir(Direction::Up), snake_corner_sprites, snake_segment_colors);
             break;
         case Tile::SnakeSegmentBottomLeft:
-            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, get_orientation(Direction::Down), snake_corner_sprites, snake_segment_colors);
+            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_from_dir(Direction::Down), snake_corner_sprites, snake_segment_colors);
             break;
         case Tile::SnakeSegmentBottomRight:
-            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, get_orientation(Direction::Right), snake_corner_sprites, snake_segment_colors);
+            draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_from_dir(Direction::Right), snake_corner_sprites, snake_segment_colors);
             break;
         default:
             break;

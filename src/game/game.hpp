@@ -16,7 +16,8 @@
 #define FOOD_SPAWN_COUNT        3
 #define PORTAL_SPAWN_COUNT      2
 #define ATTACK_SPAWN_COUNT      1
-#define STAR_SPAWN_COUNT        1
+#define RAINBOW_SPAWN_COUNT        1
+#define HEART_SPAWN_COUNT       1
 
 #define MIN_FOOD_LIFETIME       30
 #define MAX_FOOD_LIFETIME       45
@@ -27,8 +28,11 @@
 #define MIN_ATTACK_LIFETIME     22
 #define MAX_ATTACK_LIFETIME     27
 
-#define MIN_STAR_LIFETIME       23
-#define MAX_STAR_LIFETIME       26
+#define MIN_RAINBOW_LIFETIME       23
+#define MAX_RAINBOW_LIFETIME       26
+
+#define MIN_HEART_LIFETIME      20
+#define MAX_HEART_LIFETIME      25
 
 #define MIN_ROCKS               4
 #define MAX_ROCKS               6
@@ -36,13 +40,13 @@
 #define FOOD_SPAWN_MS           4000
 #define PORTAL_SPAWN_MS         5000
 #define ATTACK_SPAWN_MS         2000
-#define STAR_SPAWN_MS           6000
+#define RAINBOW_SPAWN_MS           6000
+#define HEART_SPAWN_MS          7000
 #define GHOST_SPAWN_MS          3000
 #define LIFE_TILE_MS            120
 
-#define MAX_SNAKE_SIZE          100
+#define MAX_SNAKE_SIZE          130
 #define MAX_LIVES               10
-
 #define MAX_ENTITY_COUNT        6
 
 typedef std::function<void()> interval_listener_t;
@@ -51,7 +55,8 @@ enum class Tile {
     Food,
     PortalPack,
     AttackPack,
-    StarPack,
+    RainbowPack,
+    HeartPack,
     Ghost,
     Rock,
     Empty,
@@ -150,6 +155,8 @@ public:
     }
 
     void decrease_lives();
+    void increment_lives();
+
     void update();
 
     bool is_within_grid(uint8_t x, uint8_t y) const {
