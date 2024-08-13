@@ -23,9 +23,13 @@ enum class Direction {
 
 enum class SnakeColor : uint32_t {
     Normal = 0x36D161,
+    NormalScale = 0x118C34,
     Portal = 0x44CBDB,
+    PortalScale = 0x137985,
     Attack = 0xE81522,
-    Rainbow
+    AttackScale = 0x8C070F,
+    Rainbow,
+    RainbowScale
 };
 
 struct Segment {
@@ -44,7 +48,9 @@ private:
     uint8_t tail_idx;
     uint8_t length;
     uint8_t max_length;
-    SnakeColor color;
+
+    SnakeColor body_color;
+    SnakeColor scale_color;
 
     bool can_use_portal;
     bool can_use_attack;
@@ -61,13 +67,14 @@ private:
     void on_portal_exit();
     void on_attack_exit();
     void on_rainbow_exit();
-    void update_color(SnakeColor color);
+    void update_color(SnakeColor body_color, SnakeColor scale_color);
 
 public:
     Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) :
         Entity(game, start_x, start_y, SNAKE_UPDATE_MS),
         max_length(max_length),
-        color(SnakeColor::Normal)
+        body_color(SnakeColor::Normal),
+        scale_color(SnakeColor::NormalScale)
     {
         this->segments = std::make_unique<Segment[]>(max_length);
         this->init(start_x, start_y);
@@ -81,8 +88,12 @@ public:
         return this->segments[this->head_idx];
     }
 
-    SnakeColor get_color() const {
-        return this->color;
+    SnakeColor get_body_color() const {
+        return this->body_color;
+    }
+
+    SnakeColor get_scale_color() const {
+        return this->scale_color;
     }
 
     bool can_attack() const {

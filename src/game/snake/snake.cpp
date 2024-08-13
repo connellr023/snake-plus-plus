@@ -40,8 +40,9 @@ void Snake::foreach_segment(segment_iterator_t iter) {
     }
 }
 
-void Snake::update_color(SnakeColor color) {
-    this->color = color;
+void Snake::update_color(SnakeColor body_color, SnakeColor scale_color) {
+    this->body_color = body_color;
+    this->scale_color = scale_color;
 
     this->foreach_segment([this](Segment *segment) {
         // Re-render segment with new color
@@ -54,7 +55,7 @@ void Snake::collect_portal() {
         return;
     }
 
-    this->update_color(SnakeColor::Portal);
+    this->update_color(SnakeColor::Portal, SnakeColor::PortalScale);
     this->can_use_portal = true;
     this->can_use_attack = false;
 }
@@ -64,7 +65,8 @@ void Snake::on_portal_exit() {
         return;
     }
 
-    this->color = SnakeColor::Normal;
+    this->body_color = SnakeColor::Normal;
+    this->scale_color = SnakeColor::NormalScale;
     this->can_use_portal = false;
 }
 
@@ -73,7 +75,7 @@ void Snake::collect_attack() {
         return;
     }
 
-    this->update_color(SnakeColor::Attack);
+    this->update_color(SnakeColor::Attack, SnakeColor::AttackScale);
     this->can_use_attack = true;
     this->can_use_portal = false;
 }
@@ -89,7 +91,7 @@ void Snake::on_attack_exit() {
         return;
     }
 
-    this->update_color(SnakeColor::Normal);
+    this->update_color(SnakeColor::Normal, SnakeColor::NormalScale);
     this->can_use_attack = false;
 }
 
@@ -99,7 +101,7 @@ void Snake::collect_rainbow() {
         return;
     }
 
-    this->update_color(SnakeColor::Rainbow);
+    this->update_color(SnakeColor::Rainbow, SnakeColor::RainbowScale);
     this->in_rainbow_mode = true;
     this->can_use_attack = true;
     this->can_use_portal = true;
@@ -107,7 +109,7 @@ void Snake::collect_rainbow() {
 }
 
 void Snake::on_rainbow_exit() {
-    this->update_color(SnakeColor::Normal);
+    this->update_color(SnakeColor::Normal, SnakeColor::NormalScale);
     this->in_rainbow_mode = false;
     this->can_use_attack = false;
     this->can_use_portal = false;
@@ -127,7 +129,9 @@ void Snake::init(uint8_t start_x, uint8_t start_y) {
     this->can_use_portal = false;
     this->in_rainbow_mode = false;
 
-    this->color = SnakeColor::Normal;
+    this->body_color = SnakeColor::Normal;
+    this->scale_color = SnakeColor::NormalScale;
+
     this->update_ms = SNAKE_UPDATE_MS;
 }
 
