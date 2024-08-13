@@ -16,13 +16,6 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     grid_height(grid_height),
     rng(std::random_device{}())
 {
-    // Initialize UI
-    draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
-    set_lives(MAX_LIVES);
-
-    draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
-    set_score(0);
-
     // Initialize snake
     this->snake = std::shared_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
     this->entities.insert(snake);
@@ -30,6 +23,13 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     // Initialize map
     this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
     this->generate_map();
+
+    // Initialize UI
+    draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
+    set_lives(MAX_LIVES);
+
+    draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
+    calc_score();
 
     this->fb.register_keypress_listener(KEY_UP, [this]() {
         this->snake->set_direction(Direction::Up);
@@ -65,6 +65,10 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     this->register_interval_listener(HEART_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::HeartPack, HEART_SPAWN_COUNT, MIN_HEART_LIFETIME, MAX_HEART_LIFETIME);
+    });
+
+    this->register_interval_listener(STAR_SPAWN_MS, [this]() {
+        this->generate_lifetime_tile(Tile::StarPack, STAR_SPAWN_COUNT, MIN_STAR_LIFETIME, MAX_STAR_LIFETIME);
     });
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
@@ -110,8 +114,11 @@ void Game::set_lives(uint8_t lives) {
     draw_ui_uint(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
 }
 
-void Game::set_score(uint16_t score) {
-    this->score = score;
+void Game::calc_score() {
+    constexpr float length_multiplier = 1.1f;
+    constexpr float star_multiplier = 2.3f;
+
+    this->score = static_cast<uint16_t>((this->snake->get_length() * length_multiplier) + (this->snake->get_star_count() * star_multiplier));
     draw_ui_uint(this->fb, SCORE_TEXT_X, UI_TEXT_COLOR, 3, this->score);
 }
 

@@ -117,6 +117,9 @@ void draw_tile(FrameBufferImpl &fb, int tile_x, int tile_y, Tile tile) {
         case Tile::HeartPack:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, HEART_ICON_COLOR, bg_color, SPRITE_HEART, orientation_normal);
             break;
+        case Tile::StarPack:
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, STAR_ICON_COLOR, bg_color, SPRITE_STAR, orientation_normal);
+            break;
         case Tile::Rock:
             draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, ROCK_COLOR, bg_color, SPRITE_ROCK, orientation_normal);
             break;

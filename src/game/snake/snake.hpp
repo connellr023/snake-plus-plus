@@ -48,6 +48,7 @@ private:
     uint8_t tail_idx;
     uint8_t length;
     uint8_t max_length;
+    uint8_t stars_collected;
 
     SnakeColor body_color;
     SnakeColor scale_color;
@@ -73,6 +74,7 @@ public:
     Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) :
         Entity(game, start_x, start_y, SNAKE_UPDATE_MS),
         max_length(max_length),
+        stars_collected(0),
         body_color(SnakeColor::Normal),
         scale_color(SnakeColor::NormalScale)
     {
@@ -83,6 +85,14 @@ public:
     void update() override;
     void reset(uint8_t start_x, uint8_t start_y);
     void set_direction(Direction dir);
+
+    uint8_t get_length() const {
+        return this->length;
+    }
+
+    uint8_t get_star_count() const {
+        return this->stars_collected;
+    }
 
     Segment get_head_segment() const {
         return this->segments[this->head_idx];

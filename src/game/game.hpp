@@ -16,8 +16,9 @@
 #define FOOD_SPAWN_COUNT        3
 #define PORTAL_SPAWN_COUNT      2
 #define ATTACK_SPAWN_COUNT      1
-#define RAINBOW_SPAWN_COUNT        1
+#define RAINBOW_SPAWN_COUNT     1
 #define HEART_SPAWN_COUNT       1
+#define STAR_SPAWN_COUNT        1
 
 #define MIN_FOOD_LIFETIME       30
 #define MAX_FOOD_LIFETIME       45
@@ -28,11 +29,14 @@
 #define MIN_ATTACK_LIFETIME     22
 #define MAX_ATTACK_LIFETIME     27
 
-#define MIN_RAINBOW_LIFETIME       23
-#define MAX_RAINBOW_LIFETIME       26
+#define MIN_RAINBOW_LIFETIME    23
+#define MAX_RAINBOW_LIFETIME    26
 
 #define MIN_HEART_LIFETIME      20
 #define MAX_HEART_LIFETIME      25
+
+#define MIN_STAR_LIFETIME       21
+#define MAX_STAR_LIFETIME       24
 
 #define MIN_ROCKS               4
 #define MAX_ROCKS               6
@@ -40,8 +44,9 @@
 #define FOOD_SPAWN_MS           4000
 #define PORTAL_SPAWN_MS         5000
 #define ATTACK_SPAWN_MS         2000
-#define RAINBOW_SPAWN_MS           6000
+#define RAINBOW_SPAWN_MS        6000
 #define HEART_SPAWN_MS          7000
+#define STAR_SPAWN_MS           6300
 #define GHOST_SPAWN_MS          3000
 #define LIFE_TILE_MS            120
 
@@ -57,6 +62,7 @@ enum class Tile {
     AttackPack,
     RainbowPack,
     HeartPack,
+    StarPack,
     Ghost,
     Rock,
     Empty,
@@ -139,7 +145,7 @@ public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height);
 
     void set_lives(uint8_t lives);
-    void set_score(uint16_t score);
+    void calc_score();
 
     void render_tile(uint8_t x, uint8_t y, Tile tile);
     void render_snake_tile(uint8_t x, uint8_t y, Tile tile);

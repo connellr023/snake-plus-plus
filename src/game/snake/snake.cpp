@@ -120,6 +120,7 @@ void Snake::init(uint8_t start_x, uint8_t start_y) {
     this->length = 1;
     this->head_idx = 0;
     this->tail_idx = 0;
+    this->stars_collected = 0;
 
     this->segments[this->head_idx].x = start_x;
     this->segments[this->head_idx].y = start_y;
@@ -143,7 +144,7 @@ void Snake::reset(uint8_t start_x, uint8_t start_y) {
     });
 
     this->init(start_x, start_y);
-    this->game.set_score(0);
+    this->game.calc_score();
 }
 
 bool Snake::grow() {
@@ -161,8 +162,7 @@ bool Snake::grow() {
 
     this->tail_idx = new_tail_idx;
 
-    this->game.set_score(this->length);
-
+    this->game.calc_score();
     return true;
 }
 
@@ -379,6 +379,10 @@ void Snake::update() {
             break;
         case Tile::HeartPack:
             this->game.increment_lives();
+            break;
+        case Tile::StarPack:
+            this->stars_collected++;
+            this->game.calc_score();
             break;
         default:
             break;
