@@ -1,6 +1,16 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
+#define SPRITE_TROPHY \
+    (0b00000000ULL << 56) | \
+    (0b11100111ULL << 48) | \
+    (0b10111101ULL << 40) | \
+    (0b10111101ULL << 32) | \
+    (0b10111101ULL << 24) | \
+    (0b01011010ULL << 16) | \
+    (0b00011000ULL <<  8) | \
+    (0b00111100ULL <<  0) \
+
 #define SPRITE_HEART \
     (0b00000000ULL << 56) | \
     (0b01100110ULL << 48) | \

@@ -120,6 +120,7 @@ private:
     std::list<std::shared_ptr<IntervalListenerWrapper>> interval_listeners;
 
     uint16_t score = 0;
+    uint16_t high_score = 0;
     uint8_t lives = 0;
 
     void register_interval_listener(uint64_t interval_ms, interval_listener_t listener) {

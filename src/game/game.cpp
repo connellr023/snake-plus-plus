@@ -16,6 +16,9 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     grid_height(grid_height),
     rng(std::random_device{}())
 {
+    this->score = 0;
+    this->high_score = 0;
+
     // Initialize snake
     this->snake = std::shared_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
     this->entities.insert(snake);
@@ -29,6 +32,7 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     set_lives(MAX_LIVES);
 
     draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
+    draw_ui_sprite(this->fb, HIGHSCORE_ICON_X, HIGHSCORE_ICON_COLOR, SPRITE_TROPHY);
     calc_score();
 
     this->fb.register_keypress_listener(KEY_UP, [this]() {
@@ -120,6 +124,11 @@ void Game::calc_score() {
 
     this->score = static_cast<uint16_t>((this->snake->get_length() * length_multiplier) + (this->snake->get_star_count() * star_multiplier));
     draw_ui_uint(this->fb, SCORE_TEXT_X, UI_TEXT_COLOR, 3, this->score);
+
+    if (this->score > this->high_score) {
+        this->high_score = this->score;
+        draw_ui_uint(this->fb, HIGHSCORE_TEXT_X, UI_TEXT_COLOR, 3, this->high_score);
+    }
 }
 
 void Game::decrease_lives() {
