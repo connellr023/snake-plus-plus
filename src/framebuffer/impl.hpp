@@ -1,12 +1,11 @@
 #ifdef _WIN32
-#include "WindowsFrameBuffer.h"
+#include "./windows/windows_framebuffer.hpp"
 
-#include "windows_framebuffer.hpp"
 typedef WindowsFrameBuffer FrameBufferImpl;
 
 #elif __linux__
+#include "./linux/linux_framebuffer.hpp"
 
-#include "linux_framebuffer.hpp"
 typedef LinuxFrameBuffer FrameBufferImpl;
 
 #endif

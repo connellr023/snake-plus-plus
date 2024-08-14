@@ -1,11 +1,10 @@
 #ifdef __linux__
-#include <cstdio>
 #include <X11/Xlib.h>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
 #include <cstdint>
-#include "framebuffer.hpp"
+#include "../framebuffer.hpp"
 
 class LinuxFrameBuffer : public FrameBuffer<LinuxFrameBuffer> {
 private:

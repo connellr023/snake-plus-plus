@@ -1,3 +1,4 @@
+#ifdef __linux
 #include "linux_framebuffer.hpp"
 
 void LinuxFrameBuffer::create_window_impl() {
@@ -73,3 +74,5 @@ LinuxFrameBuffer::~LinuxFrameBuffer()  {
         XCloseDisplay(this->display);
     }
 }
+
+#endif // __linux
