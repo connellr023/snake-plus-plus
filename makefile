@@ -48,7 +48,11 @@ $(TARGET): $(OBJS)
 
 # Clean up build files
 clean:
-	$(RM) $(subst /,\,$(OBJS)) $(TARGET).exe
+ifeq ($(OS),Windows_NT)
+	del /F /Q $(subst /,\,$(OBJS)) $(TARGET).exe
+else
+	$(RM) $(OBJS) $(TARGET)
+endif
 
 # Run the application
 run: $(TARGET)

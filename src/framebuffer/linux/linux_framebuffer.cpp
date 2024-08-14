@@ -1,3 +1,4 @@
+#include <X11/Xlib.h>
 #ifdef __linux
 #include "linux_framebuffer.hpp"
 
@@ -11,6 +12,7 @@ void LinuxFrameBuffer::create_window_impl() {
     this->root = DefaultRootWindow(this->display);
     this->window = XCreateSimpleWindow(this->display, root, 0, 0, this->width, this->height, 1, 0, 0);
 
+    XStoreName(this->display, this->window, "Snake++");
     XSelectInput(this->display, this->window, ExposureMask | KeyPressMask);
     XMapWindow(this->display, this->window);
 
