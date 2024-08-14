@@ -16,11 +16,12 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     grid_height(grid_height),
     rng(std::random_device{}())
 {
+    this->snake_spawn_pos = { static_cast<uint8_t>(this->grid_width / 2), static_cast<uint8_t>(this->grid_height / 2) };
     this->score = 0;
     this->high_score = 0;
 
     // Initialize snake
-    this->snake = std::shared_ptr<Snake>(new Snake(*this, SNAKE_SPAWN_X, SNAKE_SPAWN_Y, MAX_SNAKE_SIZE));
+    this->snake = std::shared_ptr<Snake>(new Snake(*this, this->snake_spawn_pos.x, this->snake_spawn_pos.y, MAX_SNAKE_SIZE));
     this->entities.insert(snake);
 
     // Initialize map
@@ -77,7 +78,10 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
         this->lazily_spawn_entity([this]() {
-            const auto [x, y] = this->generate_random_pos();
+            std::vector<Vector2> avoid_positions = { this->snake_spawn_pos };
+            constexpr int min_spacing = 5;
+            const auto [x, y] = this->generate_balanced_random_pos(avoid_positions, min_spacing);
+
             return new Ghost(*this, x, y);
         });
     });
@@ -133,7 +137,7 @@ void Game::calc_score() {
 
 void Game::decrease_lives() {
     this->set_lives(this->lives - 1);
-    this->snake->reset(SNAKE_SPAWN_X, SNAKE_SPAWN_Y);
+    this->snake->reset(this->snake_spawn_pos.x, this->snake_spawn_pos.y);
 }
 
 void Game::increment_lives() {
@@ -168,12 +172,19 @@ void Game::generate_map() {
         }
     }
 
+    constexpr int min_rock_spacing = 4;
     const uint8_t rock_count = MIN_ROCKS + (rand() % (MAX_ROCKS - MIN_ROCKS));
+    std::vector<Vector2> avoid_positions = std::vector<Vector2>(rock_count + 1);
+
+    avoid_positions.push_back(this->snake_spawn_pos);
 
     for (uint8_t i = 0; i < rock_count; i++) {
-        const auto [x, y] = this->generate_random_pos();
+        const auto [x, y] = this->generate_balanced_random_pos(avoid_positions, min_rock_spacing);
+
         this->set_tile(x, y, Tile::Rock);
         this->render_tile(x, y, Tile::Rock);
+
+        avoid_positions.push_back({ x, y });
     }
 }
 
@@ -201,6 +212,33 @@ Vector2 Game::generate_random_pos() {
     }
 
     return { x, y };
+}
+
+Vector2 Game::generate_balanced_random_pos(std::vector<Vector2> &avoid, uint8_t min_distance) {
+    constexpr int max_attempts = 100;
+
+    bool is_balanced = false;
+    int attempts = 0;
+    Vector2 pos = { 0, 0 };
+
+    while (!is_balanced && attempts++ < max_attempts) {
+        const auto [x, y] = this->generate_random_pos();
+        is_balanced = true;
+
+        for (const auto &pos : avoid) {
+            if (std::abs(x - pos.x) <= min_distance && std::abs(y - pos.y) <= min_distance) {
+                is_balanced = false;
+                break;
+            }
+        }
+
+        if (is_balanced || attempts >= max_attempts) {
+            pos = { x, y };
+            break;
+        }
+    }
+
+    return pos;
 }
 
 void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime) {

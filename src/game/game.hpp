@@ -10,9 +10,6 @@
 #include "entity/entity.hpp"
 #include "../framebuffer/impl.hpp"
 
-#define SNAKE_SPAWN_X           3
-#define SNAKE_SPAWN_Y           3
-
 #define FOOD_SPAWN_COUNT        3
 #define PORTAL_SPAWN_COUNT      2
 #define ATTACK_SPAWN_COUNT      1
@@ -108,6 +105,8 @@ private:
     int grid_width;
     int grid_height;
 
+    Vector2 snake_spawn_pos;
+
     std::mt19937 rng;
 
     std::unique_ptr<Tile[]> grid;
@@ -140,6 +139,8 @@ private:
 
     void generate_map();
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
+    Vector2 generate_random_pos();
+    Vector2 generate_balanced_random_pos(std::vector<Vector2> &avoid, uint8_t min_distance);
 
 public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height);
@@ -170,8 +171,6 @@ public:
     }
 
     void kill_entity_at_pos(uint8_t x, uint8_t y);
-
-    Vector2 generate_random_pos();
 };
 
 #endif // GAME_H

@@ -14,7 +14,7 @@ LRESULT CALLBACK WindowsFrameBuffer::WndProc(HWND hwnd, UINT msg, WPARAM wparam,
             break;
     }
 
-    return DefWindowProc(hwnd, msg, wparam, lparam);
+    return DefWindowProcW(hwnd, msg, wparam, lparam);
 }
 
 void WindowsFrameBuffer::create_window_impl() {
@@ -37,7 +37,7 @@ void WindowsFrameBuffer::create_window_impl() {
     this->hwnd = CreateWindowExW(
         0,
         class_name,
-        L"FrameBuffer",
+        L"Snake++",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -80,15 +80,14 @@ void WindowsFrameBuffer::create_window_impl() {
 
 void WindowsFrameBuffer::render_impl() {
     HDC hdc_mem = CreateCompatibleDC(this->hdc);
-
-    if (!hdc_mem) {
-        return;
-    }
+    assert(hdc_mem);
 
     HBITMAP old_bitmap = (HBITMAP) SelectObject(hdc_mem, this->bitmap);
 
     if (!old_bitmap) {
         DeleteDC(hdc_mem);
+
+        this->set_running(false);
         return;
     }
 
