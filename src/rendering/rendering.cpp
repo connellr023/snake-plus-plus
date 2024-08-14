@@ -1,7 +1,5 @@
 #include <cstdint>
 #include "rendering.hpp"
-#include "colors.hpp"
-#include "sprites.hpp"
 
 constexpr uint8_t rainbow_pack_sprite_layers = 3;
 const static uint64_t rainbow_pack_sprites[rainbow_pack_sprite_layers] = { SPRITE_VALUE_PACK, SPRITE_VALUE_PACK_INNER_1, SPRITE_VALUE_PACK_INNER_2 };
@@ -11,19 +9,19 @@ constexpr uint8_t snake_segment_sprite_layers = 2;
 const static uint64_t snake_body_sprites[snake_segment_sprite_layers] = { SPRITE_SNAKE_BODY, SPRITE_SNAKE_BODY_SCALE };
 const static uint64_t snake_corner_sprites[snake_segment_sprite_layers] = { SPRITE_SNAKE_CORNER, SPRITE_SNAKE_CORNER_SCALE };
 
-const static bit_extractor_t orientation_normal = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
+const bit_extractor_t orientation_normal = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
     return (sprite >> ((7 - y) * 8 + (7 - x))) & 1;
 };
 
-const static bit_extractor_t orientation_flipped = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
+const bit_extractor_t orientation_flipped = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
     return (sprite >> (y * 8 + x)) & 1;
 };
 
-const static bit_extractor_t orientation_rotated_90 = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
+const bit_extractor_t orientation_rotated_90 = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
     return (sprite >> ((7 - x) * 8 + y)) & 1;
 };
 
-const static bit_extractor_t orientation_rotated_270 = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
+const bit_extractor_t orientation_rotated_270 = [](uint8_t x, uint8_t y, uint64_t sprite) -> uint8_t {
     return (sprite >> (x * 8 + (7 - y))) & 1;
 };
 
@@ -62,6 +60,32 @@ uint32_t calc_gradient_color(uint8_t x, uint8_t y, uint8_t width, uint8_t height
     return hsv_to_rgb(hue, 1, 1);
 }
 
+uint32_t hsv_to_rgb(float h, float s, float v) {
+    int i = static_cast<int>(h * 6);
+
+    float r, g, b;
+    float f = (h * 6) - i;
+    float p = v * (1 - s);
+    float q = v * (1 - (f * s));
+    float t = v * (1 - ((1 - f) * s));
+
+    i = i % 6;
+
+    switch (i) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+        default: r = g = b = 0; break;
+    }
+
+    return  (static_cast<uint32_t>(r * 255) << 16) |
+            (static_cast<uint32_t>(g * 255) << 8)  |
+            (static_cast<uint32_t>(b * 255));
+}
+
 void draw_rect(FrameBufferImpl &fb, int x, int y, int width, int height, uint32_t color) {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -81,17 +105,6 @@ void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint3
 
             draw_rect(fb, pixel_x + (x * scale), pixel_y + (y * scale), scale, scale, bit ? color : bg_color);
         }
-    }
-}
-
-template<int amount>
-void draw_layered_sprites(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t bg_color, bit_extractor_t orientation, const uint64_t sprites[amount], const uint32_t colors[amount]) {
-    // Draw the first sprite that is not transparent
-    draw_sprite(fb, pixel_x, pixel_y, scale, colors[0], bg_color, sprites[0], orientation);
-
-    // Draw the rest of the sprites on top of the first one
-    for (int i = 1; i < amount; i++) {
-        draw_sprite(fb, pixel_x, pixel_y, scale, colors[i], bg_color, sprites[i], orientation, true);
     }
 }
 
@@ -176,67 +189,6 @@ void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, 
     }
 }
 
-void draw_uint(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint8_t digits, uint16_t value) {
-    const static uint64_t number_sprites[] = {
-        SPRITE_0,
-        SPRITE_1,
-        SPRITE_2,
-        SPRITE_3,
-        SPRITE_4,
-        SPRITE_5,
-        SPRITE_6,
-        SPRITE_7,
-        SPRITE_8,
-        SPRITE_9
-    };
-
-    uint8_t digit_buffer[digits];
-    uint8_t i = 1;
-
-    for (uint8_t k = 0; k < digits; k++) {
-        digit_buffer[k] = 0;
-    }
-
-    while (value > 0 && i <= digits) {
-        digit_buffer[digits - i++] = value % 10;
-        value /= 10;
-    }
-
-    for (uint8_t k = 0; k < digits; k++) {
-        draw_sprite(fb, pixel_x + (k * 8 * scale), pixel_y, scale, color, bg_color, number_sprites[digit_buffer[k]], orientation_normal);
-    }
-}
-
 void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite) {
     draw_sprite(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, sprite, orientation_normal);
-}
-
-void draw_ui_uint(FrameBufferImpl &fb, int x, uint32_t color, uint8_t digits, uint16_t value) {
-    draw_uint(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, digits, value);
-}
-
-uint32_t hsv_to_rgb(float h, float s, float v) {
-    int i = static_cast<int>(h * 6);
-
-    float r, g, b;
-    float f = (h * 6) - i;
-    float p = v * (1 - s);
-    float q = v * (1 - (f * s));
-    float t = v * (1 - ((1 - f) * s));
-
-    i = i % 6;
-
-    switch (i) {
-        case 0: r = v; g = t; b = p; break;
-        case 1: r = q; g = v; b = p; break;
-        case 2: r = p; g = v; b = t; break;
-        case 3: r = p; g = q; b = v; break;
-        case 4: r = t; g = p; b = v; break;
-        case 5: r = v; g = p; b = q; break;
-        default: r = g = b = 0; break;
-    }
-
-    return  (static_cast<uint32_t>(r * 255) << 16) |
-            (static_cast<uint32_t>(g * 255) << 8)  |
-            (static_cast<uint32_t>(b * 255));
 }

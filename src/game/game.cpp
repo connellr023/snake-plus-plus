@@ -115,7 +115,7 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
 void Game::set_lives(uint8_t lives) {
     this->lives = lives;
-    draw_ui_uint(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, 2, this->lives);
+    draw_ui_uint<2>(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, this->lives);
 }
 
 void Game::calc_score() {
@@ -123,11 +123,11 @@ void Game::calc_score() {
     constexpr float star_multiplier = 2.3f;
 
     this->score = static_cast<uint16_t>((this->snake->get_length() * length_multiplier) + (this->snake->get_star_count() * star_multiplier));
-    draw_ui_uint(this->fb, SCORE_TEXT_X, UI_TEXT_COLOR, 3, this->score);
+    draw_ui_uint<3>(this->fb, SCORE_TEXT_X, UI_TEXT_COLOR, this->score);
 
     if (this->score > this->high_score) {
         this->high_score = this->score;
-        draw_ui_uint(this->fb, HIGHSCORE_TEXT_X, UI_TEXT_COLOR, 3, this->high_score);
+        draw_ui_uint<3>(this->fb, HIGHSCORE_TEXT_X, UI_TEXT_COLOR, this->high_score);
     }
 }
 

@@ -31,6 +31,8 @@ public:
         last_update_ms(0)
     {};
 
+    virtual ~Entity() = default;
+
     virtual void update() = 0;
 
     uint8_t get_x() const {

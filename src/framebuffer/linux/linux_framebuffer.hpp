@@ -19,7 +19,11 @@ private:
     Atom wmDeleteMessage;
 
 public:
-    LinuxFrameBuffer(int width, int height) : FrameBuffer<LinuxFrameBuffer>(width, height), window(0), display(nullptr), image(nullptr) {}
+    LinuxFrameBuffer(int width, int height) :
+        FrameBuffer<LinuxFrameBuffer>(width, height),
+        window(0), display(nullptr),
+        image(nullptr)
+    {}
 
     void create_window_impl();
     void render_impl();

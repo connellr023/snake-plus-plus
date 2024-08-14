@@ -107,7 +107,6 @@ private:
 
     int grid_width;
     int grid_height;
-    int tick_ms;
 
     std::mt19937 rng;
 

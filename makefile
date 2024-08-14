@@ -5,20 +5,35 @@ CXXFLAGS = -Wall
 # Target executable name
 TARGET = build
 
-# Source files
-SRCS = \
-    src/main.cpp \
-    src/framebuffer/linux_framebuffer.cpp \
-    src/rendering/rendering.cpp \
-    src/game/game.cpp \
-    src/game/snake/snake.cpp \
-    src/game/ghost/ghost.cpp \
+# Platform-specific settings
+ifeq ($(OS),Windows_NT)
+    # Windows settings
+    RM = del
+    SRCS = \
+        src/main.cpp \
+        src/rendering/rendering.cpp \
+        src/framebuffer/windows/windows_framebuffer.cpp \
+        src/game/game.cpp \
+        src/game/snake/snake.cpp \
+        src/game/ghost/ghost.cpp \
+
+    LIBS = -lgdi32
+else
+    # Linux settings
+    RM = rm -f
+    SRCS = \
+        src/main.cpp \
+        src/rendering/rendering.cpp \
+        src/framebuffer/linux/linux_framebuffer.cpp \
+        src/game/game.cpp \
+        src/game/snake/snake.cpp \
+        src/game/ghost/ghost.cpp \
+
+    LIBS = -lX11
+endif
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
-
-# Libraries
-LIBS = -lX11
 
 # Default target
 all: $(TARGET)
@@ -33,7 +48,7 @@ $(TARGET): $(OBJS)
 
 # Clean up build files
 clean:
-	rm -f $(OBJS) $(TARGET)
+	$(RM) $(subst /,\,$(OBJS)) $(TARGET).exe
 
 # Run the application
 run: $(TARGET)
