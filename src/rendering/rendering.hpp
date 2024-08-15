@@ -3,6 +3,7 @@
 #include <functional>
 #include "colors.hpp"
 #include "sprites.hpp"
+#include "../main.hpp"
 #include "../game/game.hpp"
 
 #define UI_GLYPH_SCALE      6
@@ -14,6 +15,7 @@
 #define SCORE_TEXT_X        (UI_GLYPH_SCALE * 8) + STAR_ICON_X
 #define HIGHSCORE_ICON_X    (UI_GLYPH_SCALE * 8 * 4) + SCORE_TEXT_X
 #define HIGHSCORE_TEXT_X    (UI_GLYPH_SCALE * 8) + HIGHSCORE_ICON_X
+#define PAUSE_RESUME_ICON_X FB_WIDTH - (UI_GLYPH_SCALE * 8) - 5
 
 #define TILE_PIXELS         32
 #define TILE_SPRITE_SCALE   TILE_PIXELS / 8

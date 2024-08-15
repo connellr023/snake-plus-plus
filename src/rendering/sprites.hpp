@@ -1,6 +1,26 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
+#define SPRITE_PAUSED_ICON \
+    (0b01100110ULL << 56) | \
+    (0b01100110ULL << 48) | \
+    (0b01100110ULL << 40) | \
+    (0b01100110ULL << 32) | \
+    (0b01100110ULL << 24) | \
+    (0b01100110ULL << 16) | \
+    (0b01100110ULL <<  8) | \
+    (0b01100110ULL <<  0) \
+
+#define SPRITE_RESUMED_ICON \
+    (0b00100000ULL << 56) | \
+    (0b00110000ULL << 48) | \
+    (0b00111000ULL << 40) | \
+    (0b00111100ULL << 32) | \
+    (0b00111100ULL << 24) | \
+    (0b00111000ULL << 16) | \
+    (0b00110000ULL <<  8) | \
+    (0b00100000ULL <<  0) \
+
 #define SPRITE_TROPHY \
     (0b00000000ULL << 56) | \
     (0b11100111ULL << 48) | \

@@ -29,11 +29,13 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     // Initialize UI
     draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
-    set_lives(MAX_LIVES);
+    this->set_lives(MAX_LIVES);
 
     draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
     draw_ui_sprite(this->fb, HIGHSCORE_ICON_X, HIGHSCORE_ICON_COLOR, SPRITE_TROPHY);
-    calc_score();
+    this->calc_score();
+
+    this->resume();
 
     this->fb.register_keypress_listener(KEY_ESC, [this]() {
         if (this->is_paused) this->resume();
@@ -267,6 +269,8 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
 void Game::pause() {
     this->is_paused = true;
     this->pause_start_ms = Game::current_millis();
+    
+    draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, PAUSED_ICON_COLOR, SPRITE_PAUSED_ICON);
 }
 
 void Game::resume() {
@@ -282,6 +286,8 @@ void Game::resume() {
     }
 
     this->is_paused = false;
+
+    draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, RESUMED_ICON_COLOR, SPRITE_RESUMED_ICON);
 }
 
 void Game::update() {
