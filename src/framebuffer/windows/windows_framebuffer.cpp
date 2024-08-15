@@ -21,7 +21,7 @@ void WindowsFrameBuffer::create_window_impl() {
     const wchar_t *class_name = L"WindowsFrameBuffer";
 
     WNDCLASSW wc = { 0 };
-    wc.lpfnWndProc = WndProc;
+    wc.lpfnWndProc = WindowsFrameBuffer::WndProc;
     wc.hInstance = GetModuleHandle(nullptr);
     wc.lpszClassName = class_name;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
@@ -80,7 +80,11 @@ void WindowsFrameBuffer::create_window_impl() {
 
 void WindowsFrameBuffer::render_impl() {
     HDC hdc_mem = CreateCompatibleDC(this->hdc);
-    assert(hdc_mem);
+    
+    if (!hdc_mem) {
+        this->set_running(false);
+        return;
+    }
 
     HBITMAP old_bitmap = (HBITMAP) SelectObject(hdc_mem, this->bitmap);
 
@@ -112,10 +116,6 @@ void WindowsFrameBuffer::handle_events_impl() {
                 this->notify_keypress(keycode);
                 break;
             }
-            case WM_QUIT: {
-                this->set_running(false);
-                break;
-            }
         }
     }
 }
@@ -126,10 +126,20 @@ void WindowsFrameBuffer::write_pixel_impl(int x, int y, uint32_t color) {
 }
 
 WindowsFrameBuffer::~WindowsFrameBuffer() {
-    if (this->bitmap) DeleteObject(this->bitmap);
-    if (this->hwnd && this->hdc) ReleaseDC(this->hwnd, this->hdc);
-    if (this->hwnd) DestroyWindow(this->hwnd);
-    if (this->buffer) delete[] this->buffer;
+    if (this->bitmap) {
+        DeleteObject(this->bitmap);
+        this->bitmap = nullptr;
+    }
+
+    if (this->hdc) {
+        ReleaseDC(this->hwnd, this->hdc);
+        this->hdc = nullptr;
+    }
+
+    if (this->hwnd) {
+        DestroyWindow(this->hwnd);
+        this->hwnd = nullptr;
+    }
 }
 
 #endif // __WIN32

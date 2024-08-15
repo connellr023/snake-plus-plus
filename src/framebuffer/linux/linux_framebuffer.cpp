@@ -1,4 +1,3 @@
-#include <X11/Xlib.h>
 #ifdef __linux
 #include "linux_framebuffer.hpp"
 
@@ -52,7 +51,7 @@ void LinuxFrameBuffer::handle_events_impl() {
             }
             case ClientMessage: {
                 if (static_cast<Atom>(event.xclient.data.l[0]) == this->wmDeleteMessage) {
-                    set_running(false);
+                    this->set_running(false);
                 }
 
                 break;

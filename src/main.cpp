@@ -12,10 +12,10 @@ int main() {
     std::unique_ptr<Game> game(new Game(*fb, GRID_WIDTH, GRID_HEIGHT));
 
     while (fb->should_run()) {
+        game->update();
+
         fb->handle_events();
         fb->render();
-
-        game->update();
     }
 
     return 0;
