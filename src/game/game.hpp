@@ -52,7 +52,7 @@
 #define MAX_LIVES               10
 #define MAX_ENTITY_COUNT        6
 
-typedef std::function<void()> interval_listener_t;
+typedef std::function<void()> listener_callback_t;
 
 enum class Tile {
     Food,
@@ -73,13 +73,22 @@ enum class Tile {
     SnakeSegmentTopRight
 };
 
-struct IntervalListenerWrapper {
+struct IntervalListener {
+    uint8_t id;
     uint64_t last_interval_ms;
     uint64_t interval_ms;
-    interval_listener_t listener;
+    listener_callback_t listener;
+
+    bool operator==(const IntervalListener &other) const {
+        return this->id == other.id;
+    }
+
+    bool operator<(const IntervalListener &other) const {
+        return this->id < other.id;
+    }
 };
 
-struct LifetimeTileWrapper {
+struct LifetimeTile {
     Tile tile;
     uint8_t x;
     uint8_t y;
@@ -113,10 +122,11 @@ private:
     std::unique_ptr<Tile[]> grid;
     std::shared_ptr<Snake> snake;
 
-    std::set<std::shared_ptr<LifetimeTileWrapper>> lifetime_tiles;
+    std::set<std::shared_ptr<LifetimeTile>> lifetime_tiles;
     std::set<std::shared_ptr<Entity>> entities;
 
-    std::list<std::shared_ptr<IntervalListenerWrapper>> interval_listeners;
+    uint8_t interval_listener_id_counter = 0;
+    std::set<std::shared_ptr<IntervalListener>> interval_listeners;
 
     uint16_t score = 0;
     uint16_t high_score = 0;
@@ -125,8 +135,9 @@ private:
     bool is_paused = false;
     uint64_t pause_start_ms = 0;
 
-    void register_interval_listener(uint64_t interval_ms, interval_listener_t listener) {
-        this->interval_listeners.push_front(std::shared_ptr<IntervalListenerWrapper>(new IntervalListenerWrapper {
+    void register_interval_listener(uint64_t interval_ms, listener_callback_t listener) {
+        this->interval_listeners.insert(std::shared_ptr<IntervalListener>(new IntervalListener {
+            .id = interval_listener_id_counter++,
             .last_interval_ms = 0,
             .interval_ms = interval_ms,
             .listener = listener
@@ -140,6 +151,8 @@ private:
 
         this->entities.insert(std::shared_ptr<Entity>(entity_spawner()));
     }
+
+    //void set_cooldown_secs(uint8_t cooldown_secs);
 
     void pause();
     void resume();
@@ -158,6 +171,8 @@ private:
 
 public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height);
+
+    void start_cooldown(uint8_t secs, listener_callback_t on_finish);
 
     void set_lives(uint8_t lives);
     void calc_score();

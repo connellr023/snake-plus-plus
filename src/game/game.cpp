@@ -35,6 +35,9 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     draw_ui_sprite(this->fb, HIGHSCORE_ICON_X, HIGHSCORE_ICON_COLOR, SPRITE_TROPHY);
     this->calc_score();
 
+    //draw_ui_sprite(this->fb, CLOCK_ICON_X, CLOCK_ICON_COLOR, SPRITE_CLOCK);
+    //this->set_cooldown_secs(0);
+
     this->resume();
 
     this->fb.register_keypress_listener(KEY_ESC, [this]() {
@@ -257,7 +260,7 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
         this->set_tile(x, y, tile);
         this->render_tile(x, y, tile);
 
-        this->lifetime_tiles.insert(std::shared_ptr<LifetimeTileWrapper>(new LifetimeTileWrapper {
+        this->lifetime_tiles.insert(std::shared_ptr<LifetimeTile>(new LifetimeTile {
             .tile = tile,
             .x = x,
             .y = y,
@@ -265,6 +268,11 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
         }));
     }
 }
+
+// void Game::set_cooldown_secs(uint8_t secs) {
+//     this->cooldown_secs = secs;
+//     draw_ui_uint<2>(this->fb, CLOCK_TEXT_X, secs == 0 ? FADED_UI_TEXT_COLOR : UI_TEXT_COLOR, this->cooldown_secs);
+// }
 
 void Game::pause() {
     this->is_paused = true;
@@ -274,15 +282,15 @@ void Game::pause() {
 }
 
 void Game::resume() {
-    const uint64_t now = Game::current_millis();
+    const uint64_t paused_duration = Game::current_millis() - this->pause_start_ms;
 
     // Account for the time paused
-    for (auto wrapper : this->interval_listeners) {
-        wrapper->last_interval_ms += now - this->pause_start_ms;
+    for (auto listener : this->interval_listeners) {
+        listener->last_interval_ms += paused_duration;
     }
 
     for (auto entity : this->entities) {
-        entity->set_last_update_ms(entity->get_last_update_ms() + now - this->pause_start_ms);
+        entity->set_last_update_ms(entity->get_last_update_ms() + paused_duration);
     }
 
     this->is_paused = false;
@@ -297,10 +305,10 @@ void Game::update() {
 
     const uint64_t now = Game::current_millis();
 
-    for (auto interval_wrapper : this->interval_listeners) {
-        if (interval_wrapper->last_interval_ms + interval_wrapper->interval_ms < now) {
-            interval_wrapper->listener();
-            interval_wrapper->last_interval_ms = now;
+    for (auto listener : this->interval_listeners) {
+        if (listener->last_interval_ms + listener->interval_ms < now) {
+            listener->listener();
+            listener->last_interval_ms = now;
         }
     }
 

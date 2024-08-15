@@ -1,6 +1,16 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
+#define SPRITE_CLOCK \
+    (0b00000000ULL << 56) | \
+    (0b00011000ULL << 48) | \
+    (0b00100100ULL << 40) | \
+    (0b01010010ULL << 32) | \
+    (0b01011010ULL << 24) | \
+    (0b00100100ULL << 16) | \
+    (0b00011000ULL <<  8) | \
+    (0b00000000ULL <<  0) \
+
 #define SPRITE_PAUSED_ICON \
     (0b01100110ULL << 56) | \
     (0b01100110ULL << 48) | \
