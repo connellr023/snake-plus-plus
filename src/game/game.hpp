@@ -2,6 +2,7 @@
 #define GAME_H
 #include <cstdint>
 #include <random>
+#include <chrono>
 #include <list>
 #include <set>
 #include <memory>
@@ -121,6 +122,9 @@ private:
     uint16_t high_score = 0;
     uint8_t lives = 0;
 
+    bool is_paused = false;
+    uint64_t pause_start_ms = 0;
+
     void register_interval_listener(uint64_t interval_ms, interval_listener_t listener) {
         this->interval_listeners.push_front(std::shared_ptr<IntervalListenerWrapper>(new IntervalListenerWrapper {
             .last_interval_ms = 0,
@@ -137,10 +141,20 @@ private:
         this->entities.insert(std::shared_ptr<Entity>(entity_spawner()));
     }
 
+    void pause();
+    void resume();
+
     void generate_map();
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
     Vector2 generate_random_pos();
     Vector2 generate_balanced_random_pos(std::vector<Vector2> &avoid, uint8_t min_distance);
+
+    static uint64_t current_millis() {
+        const auto now = std::chrono::high_resolution_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+
+        return static_cast<uint64_t>(duration);
+    }
 
 public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height);

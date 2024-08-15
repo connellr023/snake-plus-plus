@@ -1,4 +1,3 @@
-#include <chrono>
 #include <cassert>
 #include <functional>
 #include <memory>
@@ -35,6 +34,11 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
     draw_ui_sprite(this->fb, HIGHSCORE_ICON_X, HIGHSCORE_ICON_COLOR, SPRITE_TROPHY);
     calc_score();
+
+    this->fb.register_keypress_listener(KEY_ESC, [this]() {
+        if (this->is_paused) this->resume();
+        else this->pause();
+    });
 
     this->fb.register_keypress_listener(KEY_UP, [this]() {
         this->snake->set_direction(Direction::Up);
@@ -260,27 +264,46 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
     }
 }
 
+void Game::pause() {
+    this->is_paused = true;
+    this->pause_start_ms = Game::current_millis();
+}
+
+void Game::resume() {
+    const uint64_t now = Game::current_millis();
+
+    // Account for the time paused
+    for (auto wrapper : this->interval_listeners) {
+        wrapper->last_interval_ms += now - this->pause_start_ms;
+    }
+
+    for (auto entity : this->entities) {
+        entity->set_last_update_ms(entity->get_last_update_ms() + now - this->pause_start_ms);
+    }
+
+    this->is_paused = false;
+}
+
 void Game::update() {
-    using milliseconds = std::chrono::milliseconds;
+    if (this->is_paused) {
+        return;
+    }
 
-    auto now = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<milliseconds>(now.time_since_epoch()).count();
-
-    uint64_t millis = static_cast<uint64_t>(duration);
+    const uint64_t now = Game::current_millis();
 
     for (auto interval_wrapper : this->interval_listeners) {
-        if (interval_wrapper->last_interval_ms + interval_wrapper->interval_ms < millis) {
+        if (interval_wrapper->last_interval_ms + interval_wrapper->interval_ms < now) {
             interval_wrapper->listener();
-            interval_wrapper->last_interval_ms = millis;
+            interval_wrapper->last_interval_ms = now;
         }
     }
 
     for (auto it = this->entities.begin(); it != this->entities.end();) {
         auto entity = *it;
 
-        if (entity->get_last_update_ms() + entity->get_update_ms() < millis) {
+        if (entity->get_last_update_ms() + entity->get_update_ms() < now) {
             entity->update();
-            entity->set_last_update_ms(millis);
+            entity->set_last_update_ms(now);
         }
 
         if (!entity->get_is_alive()) {
