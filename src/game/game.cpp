@@ -86,12 +86,12 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     });
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
-        this->lazily_spawn_entity([this](uint32_t id) {
+        this->lazily_spawn_entity([this]() {
             std::vector<Vector2> avoid_positions = { this->snake_spawn_pos };
             constexpr int min_spacing = 5;
             const auto [x, y] = this->generate_balanced_random_pos(avoid_positions, min_spacing);
 
-            return new Ghost(*this, id, x, y);
+            return new Ghost(*this, x, y);
         });
     });
 
@@ -268,11 +268,6 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
         });
     }
 }
-
-// void Game::set_cooldown_secs(uint8_t secs) {
-//     this->cooldown_secs = secs;
-//     draw_ui_uint<2>(this->fb, CLOCK_TEXT_X, secs == 0 ? FADED_UI_TEXT_COLOR : UI_TEXT_COLOR, this->cooldown_secs);
-// }
 
 void Game::pause() {
     this->is_paused = true;

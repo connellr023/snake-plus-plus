@@ -73,22 +73,12 @@ enum class Tile {
 };
 
 struct IntervalListener {
-    uint32_t id;
     uint64_t last_interval_ms;
     uint64_t interval_ms;
     listener_callback_t listener;
-
-    bool operator==(const IntervalListener &other) const {
-        return this->id == other.id;
-    }
-
-    bool operator<(const IntervalListener &other) const {
-        return this->id < other.id;
-    }
 };
 
 struct LifetimeTile {
-    uint32_t id;
     Tile tile;
     uint8_t x;
     uint8_t y;
@@ -140,23 +130,19 @@ private:
 
     void register_interval_listener(uint64_t interval_ms, listener_callback_t listener) {
         this->interval_listeners.push_back({
-            .id = this->interval_listener_id_counter++,
             .last_interval_ms = 0,
             .interval_ms = interval_ms,
             .listener = listener
         });
     }
 
-    void lazily_spawn_entity(std::function<Entity *(uint32_t id)> entity_spawner) {
+    void lazily_spawn_entity(std::function<Entity *()> entity_spawner) {
         if (entities.size() >= MAX_ENTITY_COUNT) {
             return;
         }
 
-        // Pre-increment the entity ID counter to avoid ID 0 (Reserved for the snake entity)
-        this->entities.push_back(std::shared_ptr<Entity>(entity_spawner(++this->entity_id_counter)));
+        this->entities.push_back(std::shared_ptr<Entity>(entity_spawner()));
     }
-
-    //void set_cooldown_secs(uint8_t cooldown_secs);
 
     void pause();
     void resume();
@@ -167,8 +153,10 @@ private:
     Vector2 generate_balanced_random_pos(std::vector<Vector2> &avoid, uint8_t min_distance);
 
     static uint64_t current_millis() {
-        const auto now = std::chrono::high_resolution_clock::now();
-        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+        using namespace std::chrono;
+
+        const auto now = high_resolution_clock::now();
+        const auto duration = duration_cast<milliseconds>(now.time_since_epoch()).count();
 
         return static_cast<uint64_t>(duration);
     }
