@@ -21,7 +21,7 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     // Initialize snake
     this->snake = std::shared_ptr<Snake>(new Snake(*this, this->snake_spawn_pos.x, this->snake_spawn_pos.y, MAX_SNAKE_SIZE));
-    this->entities.insert(snake);
+    this->entities.push_back(snake);
 
     // Initialize map
     this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
@@ -86,38 +86,38 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     });
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
-        this->lazily_spawn_entity([this]() {
+        this->lazily_spawn_entity([this](uint32_t id) {
             std::vector<Vector2> avoid_positions = { this->snake_spawn_pos };
             constexpr int min_spacing = 5;
             const auto [x, y] = this->generate_balanced_random_pos(avoid_positions, min_spacing);
 
-            return new Ghost(*this, x, y);
+            return new Ghost(*this, id, x, y);
         });
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
         for (auto it = this->lifetime_tiles.begin(); it != this->lifetime_tiles.end();) {
-            auto lifetime_tile = *it;
-            lifetime_tile->life_left--;
+            auto &lifetime_tile = *it;
+            lifetime_tile.life_left--;
 
-            if (this->get_tile(lifetime_tile->x, lifetime_tile->y) != lifetime_tile->tile) {
+            if (this->get_tile(lifetime_tile.x, lifetime_tile.y) != lifetime_tile.tile) {
                 it = this->lifetime_tiles.erase(it);
                 continue;
             }
-            else if (lifetime_tile->life_left <= 0) {
-                this->set_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
-                this->render_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
+            else if (lifetime_tile.life_left <= 0) {
+                this->set_tile(lifetime_tile.x, lifetime_tile.y, Tile::Empty);
+                this->render_tile(lifetime_tile.x, lifetime_tile.y, Tile::Empty);
 
                 it = this->lifetime_tiles.erase(it);
                 continue;
             }
 
-            if (lifetime_tile->life_left <= 10) {
-                if (lifetime_tile->life_left % 2 == 0) {
-                    this->render_tile(lifetime_tile->x, lifetime_tile->y, lifetime_tile->tile);
+            if (lifetime_tile.life_left <= 10) {
+                if (lifetime_tile.life_left % 2 == 0) {
+                    this->render_tile(lifetime_tile.x, lifetime_tile.y, lifetime_tile.tile);
                 }
                 else {
-                    this->render_tile(lifetime_tile->x, lifetime_tile->y, Tile::Empty);
+                    this->render_tile(lifetime_tile.x, lifetime_tile.y, Tile::Empty);
                 }
             }
 
@@ -199,7 +199,7 @@ void Game::generate_map() {
 
 void Game::kill_entity_at_pos(uint8_t x, uint8_t y) {
     for (auto it = this->entities.begin(); it != this->entities.end(); it++) {
-        auto entity = *it;
+        auto &entity = *it;
 
         if (entity->get_x() == x && entity->get_y() == y) {
             it = this->entities.erase(it);
@@ -260,12 +260,12 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
         this->set_tile(x, y, tile);
         this->render_tile(x, y, tile);
 
-        this->lifetime_tiles.insert(std::shared_ptr<LifetimeTile>(new LifetimeTile {
+        this->lifetime_tiles.push_back({
             .tile = tile,
             .x = x,
             .y = y,
             .life_left = lifetime
-        }));
+        });
     }
 }
 
@@ -277,7 +277,7 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
 void Game::pause() {
     this->is_paused = true;
     this->pause_start_ms = Game::current_millis();
-    
+
     draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, PAUSED_ICON_COLOR, SPRITE_PAUSED_ICON);
 }
 
@@ -285,11 +285,11 @@ void Game::resume() {
     const uint64_t paused_duration = Game::current_millis() - this->pause_start_ms;
 
     // Account for the time paused
-    for (auto listener : this->interval_listeners) {
-        listener->last_interval_ms += paused_duration;
+    for (auto &listener : this->interval_listeners) {
+        listener.last_interval_ms += paused_duration;
     }
 
-    for (auto entity : this->entities) {
+    for (auto &entity : this->entities) {
         entity->set_last_update_ms(entity->get_last_update_ms() + paused_duration);
     }
 
@@ -305,15 +305,15 @@ void Game::update() {
 
     const uint64_t now = Game::current_millis();
 
-    for (auto listener : this->interval_listeners) {
-        if (listener->last_interval_ms + listener->interval_ms < now) {
-            listener->listener();
-            listener->last_interval_ms = now;
+    for (auto &listener : this->interval_listeners) {
+        if (listener.last_interval_ms + listener.interval_ms < now) {
+            listener.listener();
+            listener.last_interval_ms = now;
         }
     }
 
     for (auto it = this->entities.begin(); it != this->entities.end();) {
-        auto entity = *it;
+        auto &entity = *it;
 
         if (entity->get_last_update_ms() + entity->get_update_ms() < now) {
             entity->update();

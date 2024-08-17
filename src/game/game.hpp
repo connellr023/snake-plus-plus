@@ -3,10 +3,9 @@
 #include <cstdint>
 #include <random>
 #include <chrono>
-#include <list>
-#include <set>
 #include <memory>
 #include <functional>
+#include <vector>
 #include "snake/snake.hpp"
 #include "entity/entity.hpp"
 #include "../framebuffer/impl.hpp"
@@ -74,7 +73,7 @@ enum class Tile {
 };
 
 struct IntervalListener {
-    uint8_t id;
+    uint32_t id;
     uint64_t last_interval_ms;
     uint64_t interval_ms;
     listener_callback_t listener;
@@ -89,6 +88,7 @@ struct IntervalListener {
 };
 
 struct LifetimeTile {
+    uint32_t id;
     Tile tile;
     uint8_t x;
     uint8_t y;
@@ -112,8 +112,8 @@ class Game {
 private:
     FrameBufferImpl &fb;
 
-    int grid_width;
-    int grid_height;
+    uint8_t grid_width;
+    uint8_t grid_height;
 
     Vector2 snake_spawn_pos;
 
@@ -122,11 +122,14 @@ private:
     std::unique_ptr<Tile[]> grid;
     std::shared_ptr<Snake> snake;
 
-    std::set<std::shared_ptr<LifetimeTile>> lifetime_tiles;
-    std::set<std::shared_ptr<Entity>> entities;
+    uint32_t lifetime_tile_id_counter = 0;
+    uint32_t interval_listener_id_counter = 0;
+    uint32_t entity_id_counter = 0;
 
-    uint8_t interval_listener_id_counter = 0;
-    std::set<std::shared_ptr<IntervalListener>> interval_listeners;
+    // Using vectors to maximize cache locality since there is few elements and lots of iteration
+    std::vector<LifetimeTile> lifetime_tiles {};
+    std::vector<IntervalListener> interval_listeners {};
+    std::vector<std::shared_ptr<Entity>> entities {};
 
     uint16_t score = 0;
     uint16_t high_score = 0;
@@ -136,20 +139,21 @@ private:
     uint64_t pause_start_ms = 0;
 
     void register_interval_listener(uint64_t interval_ms, listener_callback_t listener) {
-        this->interval_listeners.insert(std::shared_ptr<IntervalListener>(new IntervalListener {
-            .id = interval_listener_id_counter++,
+        this->interval_listeners.push_back({
+            .id = this->interval_listener_id_counter++,
             .last_interval_ms = 0,
             .interval_ms = interval_ms,
             .listener = listener
-        }));
+        });
     }
 
-    void lazily_spawn_entity(std::function<Entity *()> entity_spawner) {
+    void lazily_spawn_entity(std::function<Entity *(uint32_t id)> entity_spawner) {
         if (entities.size() >= MAX_ENTITY_COUNT) {
             return;
         }
 
-        this->entities.insert(std::shared_ptr<Entity>(entity_spawner()));
+        // Pre-increment the entity ID counter to avoid ID 0 (Reserved for the snake entity)
+        this->entities.push_back(std::shared_ptr<Entity>(entity_spawner(++this->entity_id_counter)));
     }
 
     //void set_cooldown_secs(uint8_t cooldown_secs);

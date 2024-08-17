@@ -8,6 +8,8 @@ class Entity {
 protected:
     Game &game;
 
+    uint32_t id;
+
     uint8_t x;
     uint8_t y;
 
@@ -23,8 +25,9 @@ private:
     uint64_t last_update_ms;
 
 public:
-    Entity(Game &game, uint8_t start_x, uint8_t start_y, uint64_t update_ms) :
+    Entity(Game &game, uint32_t id, uint8_t start_x, uint8_t start_y, uint64_t update_ms) :
         game(game),
+        id(id),
         x(start_x),
         y(start_y),
         update_ms(update_ms),

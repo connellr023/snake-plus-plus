@@ -72,7 +72,7 @@ private:
 
 public:
     Snake(Game &game, uint8_t start_x, uint8_t start_y, uint8_t max_length) :
-        Entity(game, start_x, start_y, SNAKE_UPDATE_MS),
+        Entity(game, 0, start_x, start_y, SNAKE_UPDATE_MS),
         max_length(max_length),
         stars_collected(0),
         body_color(SnakeColor::Normal),
