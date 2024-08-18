@@ -65,32 +65,26 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     this->start_interval(FOOD_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::Food, FOOD_SPAWN_COUNT, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
-        return false;
     });
 
     this->start_interval(PORTAL_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::PortalPack, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
-        return false;
     });
 
     this->start_interval(ATTACK_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
-        return false;
     });
 
     this->start_interval(RAINBOW_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::RainbowPack, RAINBOW_SPAWN_COUNT, MIN_RAINBOW_LIFETIME, MAX_RAINBOW_LIFETIME);
-        return false;
     });
 
     this->start_interval(HEART_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::HeartPack, HEART_SPAWN_COUNT, MIN_HEART_LIFETIME, MAX_HEART_LIFETIME);
-        return false;
     });
 
     this->start_interval(STAR_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::StarPack, STAR_SPAWN_COUNT, MIN_STAR_LIFETIME, MAX_STAR_LIFETIME);
-        return false;
     });
 
     this->start_interval(GHOST_SPAWN_MS, [this](bool &is_active) {
@@ -101,8 +95,6 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
             return new Ghost(*this, x, y);
         });
-
-        return false;
     });
 
     this->start_interval(LIFE_TILE_MS, [this](bool &is_active) {
@@ -133,8 +125,6 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
             it++;
         }
-
-        return false;
     });
 }
 

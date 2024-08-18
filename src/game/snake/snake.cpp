@@ -112,10 +112,6 @@ void Snake::collect_rainbow() {
 }
 
 void Snake::on_rainbow_exit() {
-    if (!this->in_rainbow_mode) {
-        return;
-    }
-
     this->update_color(SnakeColor::Normal, SnakeColor::NormalScale);
     this->in_rainbow_mode = false;
     this->can_use_attack = false;
