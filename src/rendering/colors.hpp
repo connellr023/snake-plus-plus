@@ -12,6 +12,7 @@
 
 #define UI_TEXT_COLOR           0xCFCFCF
 #define FADED_UI_TEXT_COLOR     0x7F7F7F
+#define RED_UI_TEXT_COLOR       0xFF0000
 #define CHALLENGE_ICON_COLOR    0xABEB34
 #define HEART_ICON_COLOR        0xFF001E
 #define STAR_ICON_COLOR         0xFFCF21

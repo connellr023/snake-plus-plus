@@ -51,6 +51,7 @@
 #define MAX_LIVES               10
 #define MAX_ENTITY_COUNT        6
 
+typedef std::function<bool()> interval_listener_callback_t;
 typedef std::function<void()> listener_callback_t;
 
 enum class Tile {
@@ -75,7 +76,7 @@ enum class Tile {
 struct IntervalListener {
     uint64_t last_interval_ms;
     uint64_t interval_ms;
-    listener_callback_t listener;
+    interval_listener_callback_t callback;
 };
 
 struct LifetimeTile {
@@ -105,8 +106,6 @@ private:
     uint8_t grid_width;
     uint8_t grid_height;
 
-    Vector2 snake_spawn_pos;
-
     std::mt19937 rng;
 
     std::unique_ptr<Tile[]> grid;
@@ -128,11 +127,13 @@ private:
     bool is_paused = false;
     uint64_t pause_start_ms = 0;
 
-    void register_interval_listener(uint64_t interval_ms, listener_callback_t listener) {
+    uint8_t cooldown_secs = 0;
+
+    void register_interval_listener(uint64_t interval_ms, interval_listener_callback_t listener) {
         this->interval_listeners.push_back({
             .last_interval_ms = 0,
             .interval_ms = interval_ms,
-            .listener = listener
+            .callback = listener
         });
     }
 
@@ -146,6 +147,8 @@ private:
 
     void pause();
     void resume();
+
+    void set_cooldown_secs(uint8_t secs);
 
     void generate_map();
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
@@ -167,7 +170,8 @@ public:
     void start_cooldown(uint8_t secs, listener_callback_t on_finish);
 
     void set_lives(uint8_t lives);
-    void calc_score();
+    void update_lives(int8_t amount);
+    void update_score();
 
     void render_tile(uint8_t x, uint8_t y, Tile tile);
     void render_snake_tile(uint8_t x, uint8_t y, Tile tile);
@@ -182,16 +186,13 @@ public:
         return grid_height;
     }
 
-    void decrease_lives();
-    void increment_lives();
-
     void update();
 
     bool is_within_grid(uint8_t x, uint8_t y) const {
         return x >= 0 && x < grid_width && y >= 0 && y < grid_height;
     }
 
-    void kill_entity_at_pos(uint8_t x, uint8_t y);
+    void despawn_entity(uint8_t x, uint8_t y);
 };
 
 #endif // GAME_H

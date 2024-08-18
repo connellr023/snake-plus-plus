@@ -97,7 +97,6 @@ void Snake::on_attack_exit() {
 
 void Snake::collect_rainbow() {
     if (this->in_rainbow_mode) {
-        this->on_rainbow_exit();
         return;
     }
 
@@ -106,9 +105,15 @@ void Snake::collect_rainbow() {
     this->can_use_attack = true;
     this->can_use_portal = true;
     this->update_ms = STAR_SNAKE_UPDATE_MS;
+
+    this->game.start_cooldown(RAINBOW_DURATION_SECS, [this]() { this->on_rainbow_exit(); });
 }
 
 void Snake::on_rainbow_exit() {
+    if (!this->in_rainbow_mode) {
+        return;
+    }
+
     this->update_color(SnakeColor::Normal, SnakeColor::NormalScale);
     this->in_rainbow_mode = false;
     this->can_use_attack = false;
@@ -116,14 +121,17 @@ void Snake::on_rainbow_exit() {
     this->update_ms = SNAKE_UPDATE_MS;
 }
 
-void Snake::init(uint8_t start_x, uint8_t start_y) {
+void Snake::init() {
     this->length = 1;
     this->head_idx = 0;
     this->tail_idx = 0;
     this->stars_collected = 0;
 
-    this->segments[this->head_idx].x = start_x;
-    this->segments[this->head_idx].y = start_y;
+    this->x = this->spawn_x;
+    this->y = this->spawn_y;
+
+    this->segments[this->head_idx].x = this->spawn_x;
+    this->segments[this->head_idx].y = this->spawn_y;
     this->segments[this->head_idx].dir = Direction::Right;
 
     this->can_use_attack = false;
@@ -136,15 +144,15 @@ void Snake::init(uint8_t start_x, uint8_t start_y) {
     this->update_ms = SNAKE_UPDATE_MS;
 }
 
-void Snake::reset(uint8_t start_x, uint8_t start_y) {
+void Snake::reset() {
     // Clear snake from grid
     this->foreach_segment([this](Segment *segment) {
         this->game.set_tile(segment->x, segment->y, Tile::Empty);
         this->game.render_tile(segment->x, segment->y, Tile::Empty);
     });
 
-    this->init(start_x, start_y);
-    this->game.calc_score();
+    this->init();
+    this->game.update_score();
 }
 
 bool Snake::grow() {
@@ -162,7 +170,7 @@ bool Snake::grow() {
 
     this->tail_idx = new_tail_idx;
 
-    this->game.calc_score();
+    this->game.update_score();
     return true;
 }
 
@@ -267,7 +275,8 @@ void Snake::update() {
                     this->on_portal_exit();
                 }
                 else {
-                    this->game.decrease_lives();
+                    this->game.update_lives(-1);
+                    this->reset();
                     return;
                 }
             }
@@ -284,7 +293,8 @@ void Snake::update() {
                     this->on_portal_exit();
                 }
                 else {
-                    this->game.decrease_lives();
+                    this->game.update_lives(-1);
+                    this->reset();
                     return;
                 }
             }
@@ -301,7 +311,8 @@ void Snake::update() {
                     this->on_portal_exit();
                 }
                 else {
-                    this->game.decrease_lives();
+                    this->game.update_lives(-1);
+                    this->reset();
                     return;
                 }
             }
@@ -318,7 +329,8 @@ void Snake::update() {
                     this->on_portal_exit();
                 }
                 else {
-                    this->game.decrease_lives();
+                    this->game.update_lives(-1);
+                    this->reset();
                     return;
                 }
             }
@@ -340,7 +352,7 @@ void Snake::update() {
             goto case_dead;
         case Tile::Ghost: {
             if (this->can_use_attack) {
-                this->game.kill_entity_at_pos(this->segments[this->head_idx].x, this->segments[this->head_idx].y);
+                this->game.despawn_entity(this->segments[this->head_idx].x, this->segments[this->head_idx].y);
                 this->on_attack_exit();
                 break;
             }
@@ -359,7 +371,9 @@ void Snake::update() {
             const uint8_t head_x = this->segments[this->head_idx].x;
             const uint8_t head_y = this->segments[this->head_idx].y;
 
-            this->game.decrease_lives();
+            this->game.update_lives(-1);
+            this->reset();
+
             this->game.set_tile(head_x, head_y, write_back_tile);
             this->game.render_tile(head_x, head_y, write_back_tile);
 
@@ -378,11 +392,11 @@ void Snake::update() {
             this->collect_rainbow();
             break;
         case Tile::HeartPack:
-            this->game.increment_lives();
+            this->game.update_lives(1);
             break;
         case Tile::StarPack:
             this->stars_collected++;
-            this->game.calc_score();
+            this->game.update_score();
             break;
         default:
             break;
@@ -398,4 +412,7 @@ void Snake::update() {
 
     // Update tail index
     this->tail_idx = (this->tail_idx + 1) % this->max_length;
+
+    this->x = this->segments[this->head_idx].x;
+    this->y = this->segments[this->head_idx].y;
 }

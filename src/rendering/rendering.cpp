@@ -164,7 +164,7 @@ void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, 
 
     switch (tile) {
         case Tile::SnakeHead:
-            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_body_color, bg_color, SPRITE_SNAKE_HEAD, orientation_from_dir(snake.get_head_segment().dir));
+            draw_sprite(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, snake_body_color, bg_color, SPRITE_SNAKE_HEAD, orientation_from_dir(snake.get_direction()));
             break;
         case Tile::SnakeSegmentVertical:
             draw_layered_sprites<snake_segment_sprite_layers>(fb, pixel_pos_x, pixel_pos_y, TILE_SPRITE_SCALE, bg_color, orientation_from_dir(Direction::Up), snake_body_sprites, snake_segment_colors);

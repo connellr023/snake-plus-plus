@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <cmath>
@@ -15,12 +16,13 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     grid_height(grid_height),
     rng(std::random_device{}())
 {
-    this->snake_spawn_pos = { static_cast<uint8_t>(this->grid_width / 2), static_cast<uint8_t>(this->grid_height / 2) };
     this->score = 0;
     this->high_score = 0;
 
     // Initialize snake
-    this->snake = std::shared_ptr<Snake>(new Snake(*this, this->snake_spawn_pos.x, this->snake_spawn_pos.y, MAX_SNAKE_SIZE));
+    Vector2 snake_spawn_pos = { static_cast<uint8_t>(this->grid_width / 2), static_cast<uint8_t>(this->grid_height / 2) };
+
+    this->snake = std::shared_ptr<Snake>(new Snake(*this, snake_spawn_pos.x, snake_spawn_pos.y, MAX_SNAKE_SIZE));
     this->entities.push_back(snake);
 
     // Initialize map
@@ -33,10 +35,10 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
     draw_ui_sprite(this->fb, HIGHSCORE_ICON_X, HIGHSCORE_ICON_COLOR, SPRITE_TROPHY);
-    this->calc_score();
+    this->update_score();
 
-    //draw_ui_sprite(this->fb, CLOCK_ICON_X, CLOCK_ICON_COLOR, SPRITE_CLOCK);
-    //this->set_cooldown_secs(0);
+    draw_ui_sprite(this->fb, CLOCK_ICON_X, CLOCK_ICON_COLOR, SPRITE_CLOCK);
+    this->set_cooldown_secs(0);
 
     this->resume();
 
@@ -63,36 +65,44 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     this->register_interval_listener(FOOD_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::Food, FOOD_SPAWN_COUNT, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
+        return false;
     });
 
     this->register_interval_listener(PORTAL_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::PortalPack, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
+        return false;
     });
 
     this->register_interval_listener(ATTACK_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
+        return false;
     });
 
     this->register_interval_listener(RAINBOW_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::RainbowPack, RAINBOW_SPAWN_COUNT, MIN_RAINBOW_LIFETIME, MAX_RAINBOW_LIFETIME);
+        return false;
     });
 
     this->register_interval_listener(HEART_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::HeartPack, HEART_SPAWN_COUNT, MIN_HEART_LIFETIME, MAX_HEART_LIFETIME);
+        return false;
     });
 
     this->register_interval_listener(STAR_SPAWN_MS, [this]() {
         this->generate_lifetime_tile(Tile::StarPack, STAR_SPAWN_COUNT, MIN_STAR_LIFETIME, MAX_STAR_LIFETIME);
+        return false;
     });
 
     this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
         this->lazily_spawn_entity([this]() {
-            std::vector<Vector2> avoid_positions = { this->snake_spawn_pos };
+            std::vector<Vector2> avoid_positions = { { this->snake->get_x(), this->snake->get_y() } };
             constexpr int min_spacing = 5;
             const auto [x, y] = this->generate_balanced_random_pos(avoid_positions, min_spacing);
 
             return new Ghost(*this, x, y);
         });
+
+        return false;
     });
 
     this->register_interval_listener(LIFE_TILE_MS, [this]() {
@@ -123,7 +133,27 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
             it++;
         }
+
+        return false;
     });
+}
+
+void Game::set_cooldown_secs(uint8_t secs) {
+    this->cooldown_secs = secs;
+
+    uint32_t text_color;
+
+    if (secs == 0) {
+        text_color = FADED_UI_TEXT_COLOR;
+    }
+    else if (secs > 6) {
+        text_color = UI_TEXT_COLOR;
+    }
+    else {
+        text_color = secs % 2 != 0 ? UI_TEXT_COLOR : RED_UI_TEXT_COLOR;
+    }
+
+    draw_ui_uint<2>(this->fb, CLOCK_TEXT_X, text_color, this->cooldown_secs);
 }
 
 void Game::set_lives(uint8_t lives) {
@@ -131,7 +161,11 @@ void Game::set_lives(uint8_t lives) {
     draw_ui_uint<2>(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, this->lives);
 }
 
-void Game::calc_score() {
+void Game::update_lives(int8_t amount) {
+    this->set_lives(this->lives + amount);
+}
+
+void Game::update_score() {
     constexpr float length_multiplier = 1.1f;
     constexpr float star_multiplier = 2.3f;
 
@@ -142,15 +176,6 @@ void Game::calc_score() {
         this->high_score = this->score;
         draw_ui_uint<3>(this->fb, HIGHSCORE_TEXT_X, UI_TEXT_COLOR, this->high_score);
     }
-}
-
-void Game::decrease_lives() {
-    this->set_lives(this->lives - 1);
-    this->snake->reset(this->snake_spawn_pos.x, this->snake_spawn_pos.y);
-}
-
-void Game::increment_lives() {
-    this->set_lives(this->lives + 1);
 }
 
 void Game::render_tile(uint8_t x, uint8_t y, Tile tile) {
@@ -185,7 +210,7 @@ void Game::generate_map() {
     const uint8_t rock_count = MIN_ROCKS + (rand() % (MAX_ROCKS - MIN_ROCKS));
     std::vector<Vector2> avoid_positions = std::vector<Vector2>(rock_count + 1);
 
-    avoid_positions.push_back(this->snake_spawn_pos);
+    avoid_positions.push_back({ this->snake->get_x(), this->snake->get_y() });
 
     for (uint8_t i = 0; i < rock_count; i++) {
         const auto [x, y] = this->generate_balanced_random_pos(avoid_positions, min_rock_spacing);
@@ -197,7 +222,7 @@ void Game::generate_map() {
     }
 }
 
-void Game::kill_entity_at_pos(uint8_t x, uint8_t y) {
+void Game::despawn_entity(uint8_t x, uint8_t y) {
     for (auto it = this->entities.begin(); it != this->entities.end(); it++) {
         auto &entity = *it;
 
@@ -269,6 +294,27 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
     }
 }
 
+void Game::start_cooldown(uint8_t secs, listener_callback_t on_finish) {
+    constexpr int one_second = 1000;
+
+    if (this->cooldown_secs > 0) {
+        return;
+    }
+
+    this->cooldown_secs = secs;
+
+    this->register_interval_listener(one_second, [this, on_finish]() {
+        this->set_cooldown_secs(this->cooldown_secs - 1);
+
+        if (this->cooldown_secs == 0) {
+            on_finish();
+            return true;
+        }
+
+        return false;
+    });
+}
+
 void Game::pause() {
     this->is_paused = true;
     this->pause_start_ms = Game::current_millis();
@@ -300,11 +346,21 @@ void Game::update() {
 
     const uint64_t now = Game::current_millis();
 
-    for (auto &listener : this->interval_listeners) {
+    for (auto it = this->interval_listeners.begin(); it != this->interval_listeners.end();) {
+        auto &listener = *it;
+
         if (listener.last_interval_ms + listener.interval_ms < now) {
-            listener.listener();
+            const bool is_complete = listener.callback();
+
+            if (is_complete) {
+                it = this->interval_listeners.erase(it);
+                continue;
+            }
+
             listener.last_interval_ms = now;
         }
+
+        it++;
     }
 
     for (auto it = this->entities.begin(); it != this->entities.end();) {
@@ -315,11 +371,6 @@ void Game::update() {
             entity->set_last_update_ms(now);
         }
 
-        if (!entity->get_is_alive()) {
-            it = this->entities.erase(it);
-        }
-        else {
-            it++;
-        }
+        it++;
     }
 }

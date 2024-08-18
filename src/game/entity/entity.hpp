@@ -13,13 +13,7 @@ protected:
 
     uint64_t update_ms;
 
-    void die() {
-        this->is_alive = false;
-    }
-
 private:
-    bool is_alive = true;
-
     uint64_t last_update_ms;
 
 public:
@@ -53,10 +47,6 @@ public:
 
     void set_last_update_ms(uint64_t last_update_ms) {
         this->last_update_ms = last_update_ms;
-    }
-
-    bool get_is_alive() const {
-        return this->is_alive;
     }
 };
 
