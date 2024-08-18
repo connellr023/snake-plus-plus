@@ -1,5 +1,6 @@
 #include <cstdint>
 #include "rendering.hpp"
+#include "sprites.hpp"
 
 constexpr uint8_t rainbow_pack_sprite_layers = 3;
 const static uint64_t rainbow_pack_sprites[rainbow_pack_sprite_layers] = { SPRITE_VALUE_PACK, SPRITE_VALUE_PACK_INNER_1, SPRITE_VALUE_PACK_INNER_2 };

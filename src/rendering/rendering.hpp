@@ -2,25 +2,25 @@
 #define RENDERING_H
 #include <functional>
 #include "colors.hpp"
-#include "sprites.hpp"
+#include "font.hpp"
 #include "../main.hpp"
 #include "../game/game.hpp"
 
-#define UI_GLYPH_SCALE      6
-#define UI_GLYPH_Y          690
+#define UI_GLYPH_SCALE          6
+#define UI_GLYPH_Y              690
 
-#define HEART_ICON_X        5
-#define LIVES_TEXT_X        (UI_GLYPH_SCALE * 8) + HEART_ICON_X
-#define STAR_ICON_X         (UI_GLYPH_SCALE * 8 * 3) + LIVES_TEXT_X
-#define SCORE_TEXT_X        (UI_GLYPH_SCALE * 8) + STAR_ICON_X
-#define HIGHSCORE_ICON_X    (UI_GLYPH_SCALE * 8 * 4) + SCORE_TEXT_X
-#define HIGHSCORE_TEXT_X    (UI_GLYPH_SCALE * 8) + HIGHSCORE_ICON_X
-#define CLOCK_ICON_X        (UI_GLYPH_SCALE * 8 * 4) + HIGHSCORE_TEXT_X
-#define CLOCK_TEXT_X        (UI_GLYPH_SCALE * 8) + CLOCK_ICON_X
-#define PAUSE_RESUME_ICON_X FB_WIDTH - (UI_GLYPH_SCALE * 8) - 5
+#define HEART_ICON_X            5
+#define LIVES_TEXT_X            (UI_GLYPH_SCALE * 8) + HEART_ICON_X
+#define STAR_ICON_X             (UI_GLYPH_SCALE * 8 * 3) + LIVES_TEXT_X
+#define SCORE_TEXT_X            (UI_GLYPH_SCALE * 8) + STAR_ICON_X
+#define HIGHSCORE_ICON_X        (UI_GLYPH_SCALE * 8 * 4) + SCORE_TEXT_X
+#define HIGHSCORE_TEXT_X        (UI_GLYPH_SCALE * 8) + HIGHSCORE_ICON_X
+#define CLOCK_ICON_X            (UI_GLYPH_SCALE * 8 * 4) + HIGHSCORE_TEXT_X
+#define CLOCK_TEXT_X            (UI_GLYPH_SCALE * 8) + CLOCK_ICON_X
+#define PAUSE_RESUME_ICON_X     FB_WIDTH - (UI_GLYPH_SCALE * 8) - 5
 
-#define TILE_PIXELS         32
-#define TILE_SPRITE_SCALE   TILE_PIXELS / 8
+#define TILE_PIXELS             32
+#define TILE_SPRITE_SCALE       TILE_PIXELS / 8
 
 typedef std::function<uint8_t(uint8_t, uint8_t, uint64_t)> bit_extractor_t;
 
@@ -38,6 +38,7 @@ void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint3
 void draw_tile(FrameBufferImpl &fb, int tile_x, int tile_y, Tile tile);
 void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile tile);
 void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite);
+void draw_string(FrameBufferImpl &fb, int x, int y, int scale, uint32_t color, const char *str);
 
 template<int amount>
 void draw_layered_sprites(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t bg_color, bit_extractor_t orientation, const uint64_t sprites[amount], const uint32_t colors[amount]) {
@@ -53,18 +54,18 @@ void draw_layered_sprites(FrameBufferImpl &fb, int pixel_x, int pixel_y, int sca
 template<int digits>
 void draw_uint(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t color, uint32_t bg_color, uint16_t value) {
     static_assert(digits > 1, "The number of digits must be greater than 1.");
-    
+
     const static uint64_t number_sprites[] = {
-        SPRITE_0,
-        SPRITE_1,
-        SPRITE_2,
-        SPRITE_3,
-        SPRITE_4,
-        SPRITE_5,
-        SPRITE_6,
-        SPRITE_7,
-        SPRITE_8,
-        SPRITE_9
+        CHAR_0,
+        CHAR_1,
+        CHAR_2,
+        CHAR_3,
+        CHAR_4,
+        CHAR_5,
+        CHAR_6,
+        CHAR_7,
+        CHAR_8,
+        CHAR_9
     };
 
     uint8_t *digit_buffer = new uint8_t[digits];
