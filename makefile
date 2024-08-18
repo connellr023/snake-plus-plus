@@ -16,6 +16,7 @@ ifeq ($(OS),Windows_NT)
         src/game/game.cpp \
         src/game/snake/snake.cpp \
         src/game/ghost/ghost.cpp \
+        src/start_screen/start_screen.cpp \
 
     LIBS = -lgdi32
 else
@@ -28,6 +29,7 @@ else
         src/game/game.cpp \
         src/game/snake/snake.cpp \
         src/game/ghost/ghost.cpp \
+        src/start_screen/start_screen.cpp \
 
     LIBS = -lX11
 endif

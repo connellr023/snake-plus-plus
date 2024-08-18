@@ -39,8 +39,20 @@ public:
         static_cast<Derived *>(this)->write_pixel_impl(x, y, color);
     }
 
+    void fill_screen(uint32_t color) {
+        for (int y = 0; y < this->height; y++) {
+            for (int x = 0; x < this->width; x++) {
+                this->write_pixel(x, y, color);
+            }
+        }
+    }
+
     void register_keypress_listener(uint64_t keycode, keypress_listener_t listener) {
         this->keypress_listeners[keycode] = listener;
+    }
+
+    void clear_keypress_listeners() {
+        this->keypress_listeners.clear();
     }
 
     bool should_run() const {
