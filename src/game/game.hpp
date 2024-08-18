@@ -51,7 +51,7 @@
 #define MAX_LIVES               10
 #define MAX_ENTITY_COUNT        6
 
-typedef std::function<bool()> interval_listener_callback_t;
+typedef std::function<void(bool &)> interval_listener_callback_t;
 typedef std::function<void()> listener_callback_t;
 
 enum class Tile {
@@ -74,6 +74,8 @@ enum class Tile {
 };
 
 struct IntervalListener {
+    uint32_t id;
+    bool is_active;
     uint64_t last_interval_ms;
     uint64_t interval_ms;
     interval_listener_callback_t callback;
@@ -111,9 +113,7 @@ private:
     std::unique_ptr<Tile[]> grid;
     std::shared_ptr<Snake> snake;
 
-    uint32_t lifetime_tile_id_counter = 0;
     uint32_t interval_listener_id_counter = 0;
-    uint32_t entity_id_counter = 0;
 
     // Using vectors to maximize cache locality since there is few elements and lots of iteration
     std::vector<LifetimeTile> lifetime_tiles {};
@@ -129,14 +129,6 @@ private:
 
     uint8_t cooldown_secs = 0;
 
-    void register_interval_listener(uint64_t interval_ms, interval_listener_callback_t listener) {
-        this->interval_listeners.push_back({
-            .last_interval_ms = 0,
-            .interval_ms = interval_ms,
-            .callback = listener
-        });
-    }
-
     void lazily_spawn_entity(std::function<Entity *()> entity_spawner) {
         if (entities.size() >= MAX_ENTITY_COUNT) {
             return;
@@ -147,8 +139,6 @@ private:
 
     void pause();
     void resume();
-
-    void set_cooldown_secs(uint8_t secs);
 
     void generate_map();
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
@@ -167,7 +157,11 @@ private:
 public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height);
 
-    void start_cooldown(uint8_t secs, listener_callback_t on_finish);
+    uint32_t start_cooldown(uint8_t secs, listener_callback_t on_finish);
+    uint32_t start_interval(uint64_t interval_ms, interval_listener_callback_t listener);
+    void clear_interval(uint32_t id);
+
+    void set_cooldown_secs(uint8_t secs);
 
     void set_lives(uint8_t lives);
     void update_lives(int8_t amount);

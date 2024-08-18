@@ -63,37 +63,37 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
         this->snake->set_direction(Direction::Right);
     });
 
-    this->register_interval_listener(FOOD_SPAWN_MS, [this]() {
+    this->start_interval(FOOD_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::Food, FOOD_SPAWN_COUNT, MIN_FOOD_LIFETIME, MAX_FOOD_LIFETIME);
         return false;
     });
 
-    this->register_interval_listener(PORTAL_SPAWN_MS, [this]() {
+    this->start_interval(PORTAL_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::PortalPack, PORTAL_SPAWN_COUNT, MIN_PORTAL_LIFETIME, MAX_PORTAL_LIFETIME);
         return false;
     });
 
-    this->register_interval_listener(ATTACK_SPAWN_MS, [this]() {
+    this->start_interval(ATTACK_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::AttackPack, ATTACK_SPAWN_COUNT, MIN_ATTACK_LIFETIME, MAX_ATTACK_LIFETIME);
         return false;
     });
 
-    this->register_interval_listener(RAINBOW_SPAWN_MS, [this]() {
+    this->start_interval(RAINBOW_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::RainbowPack, RAINBOW_SPAWN_COUNT, MIN_RAINBOW_LIFETIME, MAX_RAINBOW_LIFETIME);
         return false;
     });
 
-    this->register_interval_listener(HEART_SPAWN_MS, [this]() {
+    this->start_interval(HEART_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::HeartPack, HEART_SPAWN_COUNT, MIN_HEART_LIFETIME, MAX_HEART_LIFETIME);
         return false;
     });
 
-    this->register_interval_listener(STAR_SPAWN_MS, [this]() {
+    this->start_interval(STAR_SPAWN_MS, [this](bool &is_active) {
         this->generate_lifetime_tile(Tile::StarPack, STAR_SPAWN_COUNT, MIN_STAR_LIFETIME, MAX_STAR_LIFETIME);
         return false;
     });
 
-    this->register_interval_listener(GHOST_SPAWN_MS, [this]() {
+    this->start_interval(GHOST_SPAWN_MS, [this](bool &is_active) {
         this->lazily_spawn_entity([this]() {
             std::vector<Vector2> avoid_positions = { { this->snake->get_x(), this->snake->get_y() } };
             constexpr int min_spacing = 5;
@@ -105,7 +105,7 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
         return false;
     });
 
-    this->register_interval_listener(LIFE_TILE_MS, [this]() {
+    this->start_interval(LIFE_TILE_MS, [this](bool &is_active) {
         for (auto it = this->lifetime_tiles.begin(); it != this->lifetime_tiles.end();) {
             auto &lifetime_tile = *it;
             lifetime_tile.life_left--;
@@ -136,6 +136,42 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
         return false;
     });
+}
+
+uint32_t Game::start_interval(uint64_t interval_ms, interval_listener_callback_t listener) {
+    const uint32_t id = ++interval_listener_id_counter;
+
+    this->interval_listeners.push_back({
+        .id = id,
+        .is_active = true,
+        .last_interval_ms = 0,
+        .interval_ms = interval_ms,
+        .callback = listener
+    });
+
+    return id;
+}
+
+void Game::clear_interval(uint32_t id) {
+    // Binary search interval ID and mark as inactive
+    uint8_t high = this->interval_listeners.size() - 1;
+    uint8_t low = 0;
+
+    while (low <= high) {
+        uint8_t mid = low + (high - low) / 2;
+        auto &interval_listener = this->interval_listeners[mid];
+
+        if (interval_listener.id == id) {
+            interval_listener.is_active = false;
+            return;
+        }
+        else if (interval_listener.id < id) {
+            low = mid + 1;
+        }
+        else {
+            high = mid - 1;
+        }
+    }
 }
 
 void Game::set_cooldown_secs(uint8_t secs) {
@@ -227,7 +263,7 @@ void Game::despawn_entity(uint8_t x, uint8_t y) {
         auto &entity = *it;
 
         if (entity->get_x() == x && entity->get_y() == y) {
-            it = this->entities.erase(it);
+            entity->die();
             return;
         }
     }
@@ -294,24 +330,19 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
     }
 }
 
-void Game::start_cooldown(uint8_t secs, listener_callback_t on_finish) {
+uint32_t Game::start_cooldown(uint8_t secs, listener_callback_t on_finish) {
     constexpr int one_second = 1000;
 
-    if (this->cooldown_secs > 0) {
-        return;
-    }
-
+    assert(this->cooldown_secs == 0);
     this->cooldown_secs = secs;
 
-    this->register_interval_listener(one_second, [this, on_finish]() {
+    return this->start_interval(one_second, [this, on_finish](bool &is_active) {
         this->set_cooldown_secs(this->cooldown_secs - 1);
 
         if (this->cooldown_secs == 0) {
             on_finish();
-            return true;
+            is_active = false;
         }
-
-        return false;
     });
 }
 
@@ -350,14 +381,13 @@ void Game::update() {
         auto &listener = *it;
 
         if (listener.last_interval_ms + listener.interval_ms < now) {
-            const bool is_complete = listener.callback();
-
-            if (is_complete) {
-                it = this->interval_listeners.erase(it);
-                continue;
-            }
-
+            listener.callback(listener.is_active);
             listener.last_interval_ms = now;
+        }
+
+        if (!listener.is_active) {
+            it = this->interval_listeners.erase(it);
+            continue;
         }
 
         it++;
@@ -365,6 +395,11 @@ void Game::update() {
 
     for (auto it = this->entities.begin(); it != this->entities.end();) {
         auto &entity = *it;
+
+        if (entity->is_dead()) {
+            it = this->entities.erase(it);
+            continue;
+        }
 
         if (entity->get_last_update_ms() + entity->get_update_ms() < now) {
             entity->update();

@@ -14,6 +14,8 @@ protected:
     uint64_t update_ms;
 
 private:
+    bool is_alive = true;
+
     uint64_t last_update_ms;
 
 public:
@@ -28,6 +30,14 @@ public:
     virtual ~Entity() = default;
 
     virtual void update() = 0;
+
+    bool is_dead() const {
+        return !this->is_alive;
+    }
+
+    void die() {
+        this->is_alive = false;
+    }
 
     uint8_t get_x() const {
         return this->x;

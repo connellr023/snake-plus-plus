@@ -53,7 +53,7 @@ private:
     uint8_t tail_idx;
     uint8_t length;
     uint8_t max_length;
-    uint8_t stars_collected;
+    uint8_t stars_collected = 0;
 
     SnakeColor body_color;
     SnakeColor scale_color;
@@ -62,10 +62,12 @@ private:
     bool can_use_attack;
     bool in_rainbow_mode;
 
+    uint32_t rainbow_cooldown_interval_id = 0;
+
     void init();
     void foreach_segment(segment_iterator_t iter);
 
-    bool grow();
+    bool try_grow();
     void collect_food();
     void collect_portal();
     void collect_attack();
@@ -83,7 +85,6 @@ public:
         spawn_x(spawn_x),
         spawn_y(spawn_y),
         max_length(max_length),
-        stars_collected(0),
         body_color(SnakeColor::Normal),
         scale_color(SnakeColor::NormalScale)
     {

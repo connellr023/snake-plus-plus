@@ -82,7 +82,7 @@ void Snake::collect_attack() {
 
 void Snake::on_attack_exit() {
     for (uint8_t i = 0; i < GHOST_GROW_AMOUNT; i++) {
-        if (!this->grow()) {
+        if (!this->try_grow()) {
             break;
         }
     }
@@ -106,7 +106,9 @@ void Snake::collect_rainbow() {
     this->can_use_portal = true;
     this->update_ms = STAR_SNAKE_UPDATE_MS;
 
-    this->game.start_cooldown(RAINBOW_DURATION_SECS, [this]() { this->on_rainbow_exit(); });
+    this->rainbow_cooldown_interval_id = this->game.start_cooldown(RAINBOW_DURATION_SECS, [this]() {
+        this->on_rainbow_exit();
+    });
 }
 
 void Snake::on_rainbow_exit() {
@@ -152,10 +154,13 @@ void Snake::reset() {
     });
 
     this->init();
+
     this->game.update_score();
+    this->game.clear_interval(this->rainbow_cooldown_interval_id);
+    this->game.set_cooldown_secs(0);
 }
 
-bool Snake::grow() {
+bool Snake::try_grow() {
     if (this->length >= this->max_length - 2) {
         return false;
     }
@@ -176,7 +181,7 @@ bool Snake::grow() {
 
 void Snake::collect_food() {
     for (uint8_t i = 0; i < FOOD_GROW_AMOUNT; i++) {
-        if (!this->grow()) {
+        if (!this->try_grow()) {
             break;
         }
     }
