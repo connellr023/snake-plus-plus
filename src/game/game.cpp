@@ -14,7 +14,7 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     fb(fb),
     grid_width(grid_width),
     grid_height(grid_height),
-    rng(std::random_device{}())
+    rng(std::random_device {}())
 {
     this->score = 0;
     this->high_score = 0;

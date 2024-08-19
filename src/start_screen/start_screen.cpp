@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstring>
 #include "start_screen.hpp"
 #include "../keycodes.hpp"
 #include "../rendering/colors.hpp"
@@ -26,6 +27,28 @@ StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
 
     this->title_text_x = this->fb.calc_center_x(((title_text_buf_size - 1) * TITLE_TEXT_SPACING) + ((title_text_buf_size - 1) * 8 * TITLE_TEXT_SCALE));
     this->draw_title_text();
+
+    this->options[0] = {
+        .name = "Start",
+        .x = this->fb.calc_center_x(((start_option_text_buf_size - 1) * OPTION_TEXT_SPACING) + ((start_option_text_buf_size - 1) * 8 * OPTION_TEXT_SCALE)),
+        .y = START_OPTION_Y,
+        .action = [this]() { this->start_game(); }
+    };
+
+    this->options[1] = {
+        .name = "Quit",
+        .x = this->fb.calc_center_x(((quit_option_text_buf_size - 1) * OPTION_TEXT_SPACING) + ((quit_option_text_buf_size - 1) * 8 * OPTION_TEXT_SCALE)),
+        .y = QUIT_OPTION_Y,
+        .action = [this]() { this->quit_game(); }
+    };
+
+    this->draw_options();
+}
+
+void StartScreen::draw_options() {
+    for (auto option : this->options) {
+        draw_string(this->fb, option.x, option.y, OPTION_TEXT_SCALE, OPTION_TEXT_SPACING, OPTION_TEXT_COLOR, option.name);
+    }
 }
 
 void StartScreen::update_selection(uint8_t new_selection) {
