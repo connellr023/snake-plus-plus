@@ -2,7 +2,6 @@
 #define GAME_H
 #include <cstdint>
 #include <random>
-#include <chrono>
 #include <memory>
 #include <functional>
 #include <vector>
@@ -144,15 +143,6 @@ private:
     void generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifetime, uint64_t max_lifetime);
     Vector2 generate_random_pos();
     Vector2 generate_balanced_random_pos(std::vector<Vector2> &avoid, uint8_t min_distance);
-
-    static uint64_t current_millis() {
-        using namespace std::chrono;
-
-        const auto now = high_resolution_clock::now();
-        const auto duration = duration_cast<milliseconds>(now.time_since_epoch()).count();
-
-        return static_cast<uint64_t>(duration);
-    }
 
 public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height);

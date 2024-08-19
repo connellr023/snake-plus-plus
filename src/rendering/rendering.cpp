@@ -1,5 +1,6 @@
 #include <cstdint>
 #include "rendering.hpp"
+#include "font.hpp"
 #include "sprites.hpp"
 
 constexpr uint8_t rainbow_pack_sprite_layers = 3;
@@ -192,4 +193,59 @@ void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, 
 
 void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite) {
     draw_sprite(fb, x, UI_GLYPH_Y, UI_GLYPH_SCALE, color, BACKGROUND_COLOR_1, sprite, orientation_normal);
+}
+
+void draw_char(FrameBufferImpl &fb, int x, int y, int scale, uint32_t color, char c) {
+    uint64_t sprite;
+
+    switch (c) {
+        case ' ':
+            break;
+        case 'S':
+            sprite = CHAR_S;
+            break;
+        case 'N':
+            sprite = CHAR_N;
+            break;
+        case 'A':
+            sprite = CHAR_A;
+            break;
+        case 'K':
+            sprite = CHAR_K;
+            break;
+        case 'E':
+            sprite = CHAR_E;
+            break;
+        case 'R':
+            sprite = CHAR_R;
+            break;
+        case 'T':
+            sprite = CHAR_T;
+            break;
+        case 'Q':
+            sprite = CHAR_Q;
+            break;
+        case 'U':
+            sprite = CHAR_U;
+            break;
+        case 'I':
+            sprite = CHAR_I;
+            break;
+        case '+':
+            sprite = CHAR_PLUS;
+            break;
+        case '?':
+        default:
+            sprite = CHAR_QUESTION;
+            break;
+    }
+
+    draw_sprite(fb, x, y, scale, color, BACKGROUND_COLOR_1, sprite, orientation_normal);
+}
+
+void draw_string(FrameBufferImpl &fb, int x, int y, int scale, uint8_t spacing, uint32_t color, const char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        draw_char(fb, x, y, scale, color, str[i]);
+        x += (scale * 8) + spacing;
+    }
 }

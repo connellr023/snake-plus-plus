@@ -9,6 +9,7 @@
 #include "../rendering/sprites.hpp"
 #include "../rendering/colors.hpp"
 #include "../keycodes.hpp"
+#include "../utils.hpp"
 
 Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     fb(fb),
@@ -338,13 +339,13 @@ uint32_t Game::start_cooldown(uint8_t secs, listener_callback_t on_finish) {
 
 void Game::pause() {
     this->is_paused = true;
-    this->pause_start_ms = Game::current_millis();
+    this->pause_start_ms = current_millis();
 
     draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, PAUSED_ICON_COLOR, SPRITE_PAUSED_ICON);
 }
 
 void Game::resume() {
-    const uint64_t paused_duration = Game::current_millis() - this->pause_start_ms;
+    const uint64_t paused_duration = current_millis() - this->pause_start_ms;
 
     // Account for the time paused
     for (auto &listener : this->interval_listeners) {
@@ -365,7 +366,7 @@ void Game::update() {
         return;
     }
 
-    const uint64_t now = Game::current_millis();
+    const uint64_t now = current_millis();
 
     for (auto it = this->interval_listeners.begin(); it != this->interval_listeners.end();) {
         auto &listener = *it;

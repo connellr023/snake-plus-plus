@@ -38,7 +38,8 @@ void draw_sprite(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint3
 void draw_tile(FrameBufferImpl &fb, int tile_x, int tile_y, Tile tile);
 void draw_snake_tile(FrameBufferImpl &fb, Snake &snake, int tile_x, int tile_y, Tile tile);
 void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite);
-void draw_string(FrameBufferImpl &fb, int x, int y, int scale, uint32_t color, const char *str);
+void draw_char(FrameBufferImpl &fb, int x, int y, int scale, uint32_t color, char c);
+void draw_string(FrameBufferImpl &fb, int x, int y, int scale, uint8_t spacing, uint32_t color, const char *str);
 
 template<int amount>
 void draw_layered_sprites(FrameBufferImpl &fb, int pixel_x, int pixel_y, int scale, uint32_t bg_color, bit_extractor_t orientation, const uint64_t sprites[amount], const uint32_t colors[amount]) {

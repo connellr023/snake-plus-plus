@@ -2,14 +2,14 @@
 #define FRAMEBUFFER_H
 #include <cstdint>
 #include <functional>
-#include <map>
+#include <unordered_map>
 
 typedef std::function<void()> keypress_listener_t;
 
 template<typename Derived>
 class FrameBuffer {
 protected:
-    std::map<uint64_t, keypress_listener_t> keypress_listeners;
+    std::unordered_map<uint64_t, keypress_listener_t> keypress_listeners;
 
     bool is_running = false;
     int width;
@@ -45,6 +45,10 @@ public:
                 this->write_pixel(x, y, color);
             }
         }
+    }
+
+    int calc_center_x(int width) {
+        return (this->width - width) / 2;
     }
 
     void register_keypress_listener(uint64_t keycode, keypress_listener_t listener) {
