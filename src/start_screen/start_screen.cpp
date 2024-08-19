@@ -3,7 +3,6 @@
 #include "../keycodes.hpp"
 #include "../rendering/colors.hpp"
 #include "../rendering/rendering.hpp"
-#include "../utils.hpp"
 
 StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
     this->fb.register_keypress_listener(KEY_UP, [this]() {
@@ -18,8 +17,15 @@ StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
         this->options[this->selected_option].action();
     });
 
+    this->start_interval(TITLE_TEXT_MS, [this](bool is_active) {
+        this->title_text_last_update_ms = TimeManager::current_millis();
+        this->title_text_effect_idx = (this->title_text_effect_idx + 1) % (title_text_buf_size - 1);
+
+        this->draw_title_text();
+    });
+
     this->title_text_x = this->fb.calc_center_x(((title_text_buf_size - 1) * TITLE_TEXT_SPACING) + ((title_text_buf_size - 1) * 8 * TITLE_TEXT_SCALE));
-    draw_title_text();
+    this->draw_title_text();
 }
 
 void StartScreen::update_selection(uint8_t new_selection) {
@@ -36,14 +42,7 @@ void StartScreen::draw_title_text() {
 }
 
 void StartScreen::update() {
-    const uint32_t current_ms = current_millis();
-
-    if (current_ms - this->title_text_last_update_ms > TITLE_TEXT_MS) {
-        this->title_text_last_update_ms = current_ms;
-        this->title_text_effect_idx = (this->title_text_effect_idx + 1) % (title_text_buf_size - 1);
-
-        draw_title_text();
-    }
+    this->update_interval_listeners();
 }
 
 void StartScreen::start_game() {

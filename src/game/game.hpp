@@ -8,6 +8,7 @@
 #include "snake/snake.hpp"
 #include "entity/entity.hpp"
 #include "../framebuffer/impl.hpp"
+#include "../time_manager/time_manager.hpp"
 
 #define FOOD_SPAWN_COUNT        3
 #define PORTAL_SPAWN_COUNT      2
@@ -50,9 +51,6 @@
 #define MAX_LIVES               10
 #define MAX_ENTITY_COUNT        6
 
-typedef std::function<void(bool &)> interval_listener_callback_t;
-typedef std::function<void()> listener_callback_t;
-
 enum class Tile {
     Food,
     PortalPack,
@@ -70,14 +68,6 @@ enum class Tile {
     SnakeSegmentBottomRight,
     SnakeSegmentTopLeft,
     SnakeSegmentTopRight
-};
-
-struct IntervalListener {
-    uint32_t id;
-    bool is_active;
-    uint64_t last_interval_ms;
-    uint64_t interval_ms;
-    interval_listener_callback_t callback;
 };
 
 struct LifetimeTile {
@@ -100,7 +90,7 @@ struct Vector2 {
     }
 };
 
-class Game {
+class Game : public TimeManager {
 private:
     FrameBufferImpl &fb;
 
@@ -112,11 +102,7 @@ private:
     std::unique_ptr<Tile[]> grid;
     std::shared_ptr<Snake> snake;
 
-    uint32_t interval_listener_id_counter = 0;
-
-    // Using vectors to maximize cache locality since there is few elements and lots of iteration
     std::vector<LifetimeTile> lifetime_tiles {};
-    std::vector<IntervalListener> interval_listeners {};
     std::vector<std::shared_ptr<Entity>> entities {};
 
     uint16_t score = 0;
@@ -144,13 +130,12 @@ private:
     Vector2 generate_random_pos();
     Vector2 generate_balanced_random_pos(std::vector<Vector2> &avoid, uint8_t min_distance);
 
+    void update_entities();
+
 public:
     Game(FrameBufferImpl &fb, int grid_width, int grid_height);
 
-    uint32_t start_cooldown(uint8_t secs, listener_callback_t on_finish);
-    uint32_t start_interval(uint64_t interval_ms, interval_listener_callback_t listener);
-    void clear_interval(uint32_t id);
-
+    uint32_t start_cooldown(uint8_t secs, std::function<void()> on_finish);
     void set_cooldown_secs(uint8_t secs);
 
     void set_lives(uint8_t lives);

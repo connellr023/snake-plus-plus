@@ -9,7 +9,6 @@
 #include "../rendering/sprites.hpp"
 #include "../rendering/colors.hpp"
 #include "../keycodes.hpp"
-#include "../utils.hpp"
 
 Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     fb(fb),
@@ -127,42 +126,6 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
             it++;
         }
     });
-}
-
-uint32_t Game::start_interval(uint64_t interval_ms, interval_listener_callback_t listener) {
-    const uint32_t id = ++interval_listener_id_counter;
-
-    this->interval_listeners.push_back({
-        .id = id,
-        .is_active = true,
-        .last_interval_ms = 0,
-        .interval_ms = interval_ms,
-        .callback = listener
-    });
-
-    return id;
-}
-
-void Game::clear_interval(uint32_t id) {
-    // Binary search interval ID and mark as inactive
-    uint8_t high = this->interval_listeners.size() - 1;
-    uint8_t low = 0;
-
-    while (low <= high) {
-        uint8_t mid = low + (high - low) / 2;
-        auto &interval_listener = this->interval_listeners[mid];
-
-        if (interval_listener.id == id) {
-            interval_listener.is_active = false;
-            return;
-        }
-        else if (interval_listener.id < id) {
-            low = mid + 1;
-        }
-        else {
-            high = mid - 1;
-        }
-    }
 }
 
 void Game::set_cooldown_secs(uint8_t secs) {
@@ -321,7 +284,7 @@ void Game::generate_lifetime_tile(Tile tile, uint8_t amount, uint64_t min_lifeti
     }
 }
 
-uint32_t Game::start_cooldown(uint8_t secs, listener_callback_t on_finish) {
+uint32_t Game::start_cooldown(uint8_t secs, std::function<void()> on_finish) {
     constexpr int one_second = 1000;
 
     assert(this->cooldown_secs == 0);
@@ -339,13 +302,13 @@ uint32_t Game::start_cooldown(uint8_t secs, listener_callback_t on_finish) {
 
 void Game::pause() {
     this->is_paused = true;
-    this->pause_start_ms = current_millis();
+    this->pause_start_ms = Game::current_millis();
 
     draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, PAUSED_ICON_COLOR, SPRITE_PAUSED_ICON);
 }
 
 void Game::resume() {
-    const uint64_t paused_duration = current_millis() - this->pause_start_ms;
+    const uint64_t paused_duration = Game::current_millis() - this->pause_start_ms;
 
     // Account for the time paused
     for (auto &listener : this->interval_listeners) {
@@ -361,28 +324,8 @@ void Game::resume() {
     draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, RESUMED_ICON_COLOR, SPRITE_RESUMED_ICON);
 }
 
-void Game::update() {
-    if (this->is_paused) {
-        return;
-    }
-
-    const uint64_t now = current_millis();
-
-    for (auto it = this->interval_listeners.begin(); it != this->interval_listeners.end();) {
-        auto &listener = *it;
-
-        if (listener.last_interval_ms + listener.interval_ms < now) {
-            listener.callback(listener.is_active);
-            listener.last_interval_ms = now;
-        }
-
-        if (!listener.is_active) {
-            it = this->interval_listeners.erase(it);
-            continue;
-        }
-
-        it++;
-    }
+void Game::update_entities() {
+    const uint64_t now = Game::current_millis();
 
     for (auto it = this->entities.begin(); it != this->entities.end();) {
         auto &entity = *it;
@@ -399,4 +342,13 @@ void Game::update() {
 
         it++;
     }
+}
+
+void Game::update() {
+    if (this->is_paused) {
+        return;
+    }
+
+    this->update_interval_listeners();
+    this->update_entities();
 }

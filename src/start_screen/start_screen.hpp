@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <functional>
 #include "../framebuffer/impl.hpp"
+#include "../time_manager/time_manager.hpp"
 
 #define TITLE_TEXT_COLOR_1  0xF27E11
 #define TITLE_TEXT_COLOR_2  0xFCAA38
@@ -20,7 +21,7 @@ struct StartOption {
     std::function<void()> action;
 };
 
-class StartScreen {
+class StartScreen : public TimeManager {
 private:
     FrameBufferImpl &fb;
 
