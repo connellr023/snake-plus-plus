@@ -31,6 +31,7 @@ StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
 
     this->options[0] = {
         .name = start_option_text,
+        .color = START_OPTION_COLOR,
         .x = this->fb.calc_center_x(((start_option_text_buf_size - 1) * OPTION_TEXT_SPACING) + ((start_option_text_buf_size - 1) * 8 * OPTION_TEXT_SCALE)),
         .y = START_OPTION_Y,
         .action = [this]() { this->start_game(); }
@@ -38,6 +39,7 @@ StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
 
     this->options[1] = {
         .name = quit_option_text,
+        .color = QUIT_OPTION_COLOR,
         .x = this->fb.calc_center_x(((quit_option_text_buf_size - 1) * OPTION_TEXT_SPACING) + ((quit_option_text_buf_size - 1) * 8 * OPTION_TEXT_SCALE)),
         .y = QUIT_OPTION_Y,
         .action = [this]() { this->quit_game(); }
@@ -52,8 +54,8 @@ void StartScreen::draw_options() {
         uint32_t arrow_color = BACKGROUND_COLOR_1;
 
         if (option == this->options[this->selected_option]) {
-            option_color = SELECTED_OPTION_COLOR;
-            arrow_color = SELECTED_OPTION_COLOR;
+            option_color = option.color;
+            arrow_color = SELECT_ARROW_COLOR;
         }
 
         draw_sprite(this->fb, option.x - (8 * OPTION_TEXT_SCALE) - (OPTION_TEXT_SPACING / 2), option.y, OPTION_TEXT_SCALE, arrow_color, BACKGROUND_COLOR_1, SPRITE_SELECT_ARROW, orientation_normal);

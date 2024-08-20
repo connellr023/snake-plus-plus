@@ -9,18 +9,20 @@
 #define TITLE_TEXT_COLOR_2      0xFCAA38
 
 #define OPTION_TEXT_COLOR       0xFFFFFF
-#define SELECTED_OPTION_COLOR   0xFF0000
+#define SELECT_ARROW_COLOR      0xFFFF00
+#define START_OPTION_COLOR      0x00FF00
+#define QUIT_OPTION_COLOR       0xFF0000
 
 #define TITLE_TEXT_MS           700
-#define TITLE_TEXT_SCALE        8
+#define TITLE_TEXT_SCALE        12
 #define TITLE_TEXT_SPACING      2
-#define TITLE_TEXT_Y            30
+#define TITLE_TEXT_Y            50
 
 #define OPTION_TEXT_SPACING     0
-#define OPTION_TEXT_SCALE       5
+#define OPTION_TEXT_SCALE       7
 
-#define START_OPTION_Y          200
-#define QUIT_OPTION_Y           290
+#define START_OPTION_Y          300
+#define QUIT_OPTION_Y           410
 
 constexpr int title_text_buf_size = 8;
 constexpr char title_text[title_text_buf_size] = "SNAKE++";
@@ -33,6 +35,7 @@ constexpr char quit_option_text[quit_option_text_buf_size] = "QUIT";
 
 struct StartOption {
     const char *name;
+    uint32_t color;
     int x;
     int y;
     std::function<void()> action;
