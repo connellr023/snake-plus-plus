@@ -1,6 +1,16 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
+#define SPRITE_SELECT_ARROW \
+    (0b00000000ULL << 56) | \
+    (0b01000000ULL << 48) | \
+    (0b01100000ULL << 40) | \
+    (0b01110000ULL << 32) | \
+    (0b01110000ULL << 24) | \
+    (0b01100000ULL << 16) | \
+    (0b01000000ULL <<  8) | \
+    (0b00000000ULL <<  0) \
+
 #define SPRITE_CLOCK \
     (0b00000000ULL << 56) | \
     (0b00011000ULL << 48) | \

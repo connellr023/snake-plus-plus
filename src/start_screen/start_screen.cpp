@@ -4,6 +4,7 @@
 #include "../keycodes.hpp"
 #include "../rendering/colors.hpp"
 #include "../rendering/rendering.hpp"
+#include "../rendering/sprites.hpp"
 
 StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
     this->fb.register_keypress_listener(KEY_UP, [this]() {
@@ -29,14 +30,14 @@ StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
     this->draw_title_text();
 
     this->options[0] = {
-        .name = "Start",
+        .name = start_option_text,
         .x = this->fb.calc_center_x(((start_option_text_buf_size - 1) * OPTION_TEXT_SPACING) + ((start_option_text_buf_size - 1) * 8 * OPTION_TEXT_SCALE)),
         .y = START_OPTION_Y,
         .action = [this]() { this->start_game(); }
     };
 
     this->options[1] = {
-        .name = "Quit",
+        .name = quit_option_text,
         .x = this->fb.calc_center_x(((quit_option_text_buf_size - 1) * OPTION_TEXT_SPACING) + ((quit_option_text_buf_size - 1) * 8 * OPTION_TEXT_SCALE)),
         .y = QUIT_OPTION_Y,
         .action = [this]() { this->quit_game(); }
@@ -47,7 +48,16 @@ StartScreen::StartScreen(FrameBufferImpl &fb) : fb(fb) {
 
 void StartScreen::draw_options() {
     for (auto option : this->options) {
-        draw_string(this->fb, option.x, option.y, OPTION_TEXT_SCALE, OPTION_TEXT_SPACING, OPTION_TEXT_COLOR, option.name);
+        uint32_t option_color = OPTION_TEXT_COLOR;
+        uint32_t arrow_color = BACKGROUND_COLOR_1;
+
+        if (option == this->options[this->selected_option]) {
+            option_color = SELECTED_OPTION_COLOR;
+            arrow_color = SELECTED_OPTION_COLOR;
+        }
+
+        draw_sprite(this->fb, option.x - (8 * OPTION_TEXT_SCALE) - (OPTION_TEXT_SPACING / 2), option.y, OPTION_TEXT_SCALE, arrow_color, BACKGROUND_COLOR_1, SPRITE_SELECT_ARROW, orientation_normal);
+        draw_string(this->fb, option.x, option.y, OPTION_TEXT_SCALE, OPTION_TEXT_SPACING, option_color, option.name);
     }
 }
 
@@ -55,6 +65,7 @@ void StartScreen::update_selection(uint8_t new_selection) {
     assert(new_selection < StartScreen::option_count);
 
     this->selected_option = new_selection;
+    this->draw_options();
 }
 
 void StartScreen::draw_title_text() {
