@@ -196,7 +196,7 @@ void draw_ui_sprite(FrameBufferImpl &fb, int x, uint32_t color, uint64_t sprite)
 }
 
 void draw_char(FrameBufferImpl &fb, int x, int y, int scale, uint32_t color, char c) {
-    uint64_t sprite;
+    uint64_t sprite = 0;
 
     switch (c) {
         case ' ':

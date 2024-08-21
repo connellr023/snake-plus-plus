@@ -5,14 +5,6 @@
 #include "../framebuffer/impl.hpp"
 #include "../time_manager/time_manager.hpp"
 
-#define TITLE_TEXT_COLOR_1      0xF27E11
-#define TITLE_TEXT_COLOR_2      0xFCAA38
-
-#define OPTION_TEXT_COLOR       0xFFFFFF
-#define SELECT_ARROW_COLOR      0xFFFF00
-#define START_OPTION_COLOR      0x00FF00
-#define QUIT_OPTION_COLOR       0xFF0000
-
 #define TITLE_TEXT_MS           700
 #define TITLE_TEXT_SCALE        12
 #define TITLE_TEXT_SPACING      2
