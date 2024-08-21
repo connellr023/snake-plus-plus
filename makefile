@@ -17,6 +17,7 @@ ifeq ($(OS),Windows_NT)
         src/game/snake/snake.cpp \
         src/game/ghost/ghost.cpp \
         src/start_screen/start_screen.cpp \
+        src/over_screen/over_screen.cpp \
         src/time_manager/time_manager.cpp \
 
     LIBS = -lgdi32
@@ -31,6 +32,7 @@ else
         src/game/snake/snake.cpp \
         src/game/ghost/ghost.cpp \
         src/start_screen/start_screen.cpp \
+        src/over_screen/over_screen.cpp \
         src/time_manager/time_manager.cpp \
 
     LIBS = -lX11
