@@ -48,7 +48,6 @@
 #define LIFE_TILE_MS            120
 
 #define MAX_SNAKE_SIZE          130
-#define MAX_LIVES               10
 #define MAX_ENTITY_COUNT        6
 
 enum class Tile {
@@ -107,9 +106,10 @@ private:
 
     uint16_t score = 0;
     uint16_t high_score = 0;
-    uint8_t lives = 0;
+    uint8_t lives = 5;
 
-    bool is_paused = false;
+    bool is_over_state = false;
+    bool is_paused_state = false;
     uint64_t pause_start_ms = 0;
 
     uint8_t cooldown_secs = 0;
@@ -161,7 +161,13 @@ public:
         return x >= 0 && x < grid_width && y >= 0 && y < grid_height;
     }
 
+    bool is_over() const {
+        return is_over_state;
+    }
+
     void despawn_entity(uint8_t x, uint8_t y);
+
+    ~Game();
 };
 
 #endif // GAME_H

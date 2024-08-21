@@ -24,15 +24,25 @@ int main() {
     // Create the game instance
     Game *game = new Game(*fb, GRID_WIDTH, GRID_HEIGHT);
 
-    while (fb->should_run()) {
+    while (fb->should_run() && !game->is_over()) {
         game->update();
 
         fb->handle_events();
         fb->render();
     }
 
+    const bool is_game_over = game->is_over();
     delete game;
-    delete fb;
 
+    if (is_game_over) {
+        fb->fill_screen(0xFF0000);
+
+        while (fb->should_run()) {
+            fb->handle_events();
+            fb->render();
+        }
+    }
+
+    delete fb;
     return 0;
 }

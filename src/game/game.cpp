@@ -16,9 +16,6 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     grid_height(grid_height),
     rng(std::random_device {}())
 {
-    this->score = 0;
-    this->high_score = 0;
-
     // Initialize snake
     Vector2 snake_spawn_pos = { static_cast<uint8_t>(this->grid_width / 2), static_cast<uint8_t>(this->grid_height / 2) };
 
@@ -31,7 +28,7 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
 
     // Initialize UI
     draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
-    this->set_lives(MAX_LIVES);
+    this->set_lives(this->lives);
 
     draw_ui_sprite(this->fb, STAR_ICON_X, STAR_ICON_COLOR, SPRITE_STAR);
     draw_ui_sprite(this->fb, HIGHSCORE_ICON_X, HIGHSCORE_ICON_COLOR, SPRITE_TROPHY);
@@ -43,7 +40,7 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     this->resume();
 
     this->fb.register_keypress_listener(KEY_ESC, [this]() {
-        if (this->is_paused) this->resume();
+        if (this->is_paused_state) this->resume();
         else this->pause();
     });
 
@@ -148,6 +145,12 @@ void Game::set_cooldown_secs(uint8_t secs) {
 
 void Game::set_lives(uint8_t lives) {
     this->lives = lives;
+
+    if (this->lives == 0) {
+        this->is_over_state = true;
+        return;
+    }
+
     draw_ui_uint<2>(this->fb, LIVES_TEXT_X, UI_TEXT_COLOR, this->lives);
 }
 
@@ -301,7 +304,7 @@ uint32_t Game::start_cooldown(uint8_t secs, std::function<void()> on_finish) {
 }
 
 void Game::pause() {
-    this->is_paused = true;
+    this->is_paused_state = true;
     this->pause_start_ms = Game::current_millis();
 
     draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, PAUSED_ICON_COLOR, SPRITE_PAUSED_ICON);
@@ -319,7 +322,7 @@ void Game::resume() {
         entity->set_last_update_ms(entity->get_last_update_ms() + paused_duration);
     }
 
-    this->is_paused = false;
+    this->is_paused_state = false;
 
     draw_ui_sprite(this->fb, PAUSE_RESUME_ICON_X, RESUMED_ICON_COLOR, SPRITE_RESUMED_ICON);
 }
@@ -345,10 +348,14 @@ void Game::update_entities() {
 }
 
 void Game::update() {
-    if (this->is_paused) {
+    if (this->is_paused_state) {
         return;
     }
 
     this->update_interval_listeners();
     this->update_entities();
+}
+
+Game::~Game() {
+    this->fb.clear_keypress_listeners();
 }
