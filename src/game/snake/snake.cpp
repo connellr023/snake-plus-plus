@@ -200,7 +200,7 @@ void Snake::update() {
 
     if (this->length > 1) {
         const Direction prev_dir = this->segments[(this->head_idx - 1 + this->max_length) % this->max_length].dir;
-        Tile new_segment;
+        Tile new_segment = Tile::Empty;
 
         switch (dir) {
             case Direction::Up: {
