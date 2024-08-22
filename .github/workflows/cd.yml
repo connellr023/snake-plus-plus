@@ -52,3 +52,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: linux_x86_x64_release
+          path: ./build

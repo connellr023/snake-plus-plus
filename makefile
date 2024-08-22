@@ -66,6 +66,7 @@ run: $(TARGET)
 
 # Release build with optimizations
 release: CXXFLAGS += -O2
+release: all
 
 # Phony targets
 .PHONY: all clean run release
