@@ -1,0 +1,54 @@
+name: Continuous Delivery
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install make
+        run: choco install make -y
+
+      - name: Set up MSVC
+        uses: msys2/setup-msys2@v2
+        with:
+          arch: x86_64
+
+      - name: Build Windows x86/x64 Release
+        run: |
+          make release
+
+      - name: Upload Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows_x86_x64_release
+          path: ./build.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install -y libx11-dev &&
+          sudo apt-get install -y g++
+
+      - name: Build Linux x86/x64 Release
+        run: |
+          make release
+
+      - name: Upload Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_x86_x64_release
