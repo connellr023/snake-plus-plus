@@ -36,11 +36,11 @@ uint32_t TimeManager::start_interval(uint64_t interval_ms, interval_listener_cal
 
 void TimeManager::clear_interval(uint32_t id) {
     // Binary search interval ID and mark as inactive
-    uint8_t high = this->interval_listeners.size() - 1;
-    uint8_t low = 0;
+    int high = this->interval_listeners.size() - 1;
+    int low = 0;
 
     while (low <= high) {
-        uint8_t mid = low + (high - low) / 2;
+        int mid = low + (high - low) / 2;
         auto &interval_listener = this->interval_listeners[mid];
 
         if (interval_listener.id == id) {

@@ -33,7 +33,7 @@ void Snake::foreach_segment(segment_iterator_t iter) {
         iter(&this->segments[idx]);
 
         if (idx == this->tail_idx) {
-            break;
+            return;
         }
 
         idx = (idx - 1 + this->max_length) % this->max_length;
