@@ -20,6 +20,8 @@ jobs:
           release_name: "Release ${{ github.ref }}"
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-windows:
     runs-on: windows-latest
@@ -47,6 +49,8 @@ jobs:
           asset_path: ./build.exe
           asset_name: windows_x86_x64_release.exe
           asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
     runs-on: ubuntu-latest
@@ -71,3 +75,5 @@ jobs:
           asset_path: ./build
           asset_name: linux_x86_x64_release
           asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
