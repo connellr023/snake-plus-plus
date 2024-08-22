@@ -18,7 +18,7 @@ void OverScreen::draw() {
 
     const int message_width = (message_buffer_size - 1) * 8 * message_text_scale + (message_buffer_size - 1) * message_text_spacing;
     const int center_x = this->fb.calc_center_x(message_width);
-    const int center_y = this->fb.calc_center_y(16);
+    const int center_y = this->fb.calc_center_y(8 * message_text_scale);
 
     this->fb.fill_screen(BACKGROUND_COLOR_1);
 

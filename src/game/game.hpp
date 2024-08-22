@@ -106,7 +106,7 @@ private:
 
     uint16_t score = 0;
     uint16_t high_score = 0;
-    uint8_t lives = 5;
+    uint8_t lives = 10;
 
     bool is_over_state = false;
     bool is_paused_state = false;
