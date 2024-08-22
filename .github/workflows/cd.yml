@@ -8,6 +8,8 @@ on:
 jobs:
   create_release:
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -26,7 +28,6 @@ jobs:
   build-windows:
     runs-on: windows-latest
     needs: create_release
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -45,7 +46,7 @@ jobs:
       - name: Upload Windows Release to GitHub
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: ./build.exe
           asset_name: windows_x86_x64_release.exe
           asset_content_type: application/octet-stream
@@ -55,7 +56,6 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     needs: create_release
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -71,7 +71,7 @@ jobs:
       - name: Upload Linux Release to GitHub
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: ./build
           asset_name: linux_x86_x64_release
           asset_content_type: application/octet-stream
