@@ -6,8 +6,24 @@ on:
       - "v*"
 
 jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: "Release ${{ github.ref }}"
+          draft: false
+          prerelease: false
+
   build-windows:
     runs-on: windows-latest
+    needs: create_release
 
     steps:
       - name: Checkout
@@ -22,17 +38,19 @@ jobs:
           arch: x86_64
 
       - name: Build Windows x86/x64 Release
-        run: |
-          make release
+        run: make release
 
-      - name: Upload Release
-        uses: actions/upload-artifact@v3
+      - name: Upload Windows Release to GitHub
+        uses: actions/upload-release-asset@v1
         with:
-          name: windows_x86_x64_release
-          path: ./build.exe
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build.exe
+          asset_name: windows_x86_x64_release.exe
+          asset_content_type: application/octet-stream
 
   build-linux:
     runs-on: ubuntu-latest
+    needs: create_release
 
     steps:
       - name: Checkout
@@ -41,15 +59,15 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update &&
-          sudo apt-get install -y libx11-dev &&
-          sudo apt-get install -y g++
+          sudo apt-get install -y libx11-dev g++
 
       - name: Build Linux x86/x64 Release
-        run: |
-          make release
+        run: make release
 
-      - name: Upload Release
-        uses: actions/upload-artifact@v3
+      - name: Upload Linux Release to GitHub
+        uses: actions/upload-release-asset@v1
         with:
-          name: linux_x86_x64_release
-          path: ./build
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build
+          asset_name: linux_x86_x64_release
+          asset_content_type: application/octet-stream
