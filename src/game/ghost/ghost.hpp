@@ -15,9 +15,6 @@ private:
 
 public:
     Ghost(Game &game, uint8_t start_x, uint8_t start_y) : Entity(game, start_x, start_y, GHOST_UPDATE_MS) {
-        this->game.set_tile(this->x, this->y, Tile::Ghost);
-        this->game.render_tile(this->x, this->y, Tile::Ghost);
-
         this->randomize_dir();
     };
 

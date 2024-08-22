@@ -80,17 +80,7 @@ private:
     void reset();
 
 public:
-    Snake(Game &game, uint8_t spawn_x, uint8_t spawn_y, uint8_t max_length) :
-        Entity(game, spawn_x, spawn_y, SNAKE_UPDATE_MS),
-        spawn_x(spawn_x),
-        spawn_y(spawn_y),
-        max_length(max_length),
-        body_color(SnakeColor::Normal),
-        scale_color(SnakeColor::NormalScale)
-    {
-        this->segments = std::make_unique<Segment[]>(max_length);
-        this->init();
-    }
+    Snake(Game &game, uint8_t spawn_x, uint8_t spawn_y, uint8_t max_length);
 
     void update() override;
     void set_direction(Direction dir);

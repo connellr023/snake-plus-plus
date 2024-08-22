@@ -8,6 +8,8 @@ private:
 
     bool is_running = true;
 
+    void draw();
+
 public:
     OverScreen(FrameBufferImpl &fb);
 

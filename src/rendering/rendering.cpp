@@ -231,6 +231,12 @@ void draw_char(FrameBufferImpl &fb, int x, int y, int scale, uint32_t color, cha
         case 'I':
             sprite = CHAR_I;
             break;
+        case 'X':
+            sprite = CHAR_X;
+            break;
+        case 'O':
+            sprite = CHAR_O;
+            break;
         case '+':
             sprite = CHAR_PLUS;
             break;

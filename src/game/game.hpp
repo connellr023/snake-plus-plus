@@ -114,13 +114,7 @@ private:
 
     uint8_t cooldown_secs = 0;
 
-    void lazily_spawn_entity(std::function<Entity *()> entity_spawner) {
-        if (entities.size() >= MAX_ENTITY_COUNT) {
-            return;
-        }
-
-        this->entities.push_back(std::shared_ptr<Entity>(entity_spawner()));
-    }
+    void lazily_spawn_entity(std::function<Entity *()> entity_spawner);
 
     void pause();
     void resume();

@@ -51,6 +51,10 @@ public:
         return (this->width - width) / 2;
     }
 
+    int calc_center_y(int height) {
+        return (this->height - height) / 2;
+    }
+
     void register_keypress_listener(uint64_t keycode, keypress_listener_t listener) {
         this->keypress_listeners[keycode] = listener;
     }

@@ -26,6 +26,9 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
     this->grid = std::make_unique<Tile[]>(grid_width * grid_height);
     this->generate_map();
 
+    // Pre-update snake
+    this->snake->update();
+
     // Initialize UI
     draw_ui_sprite(this->fb, HEART_ICON_X, HEART_ICON_COLOR, SPRITE_HEART);
     this->set_lives(this->lives);
@@ -123,6 +126,18 @@ Game::Game(FrameBufferImpl &fb, int grid_width, int grid_height) :
             it++;
         }
     });
+}
+
+void Game::lazily_spawn_entity(std::function<Entity *()> entity_spawner) {
+    if (entities.size() >= MAX_ENTITY_COUNT) {
+        return;
+    }
+
+    Entity *entity = entity_spawner();
+    this->entities.push_back(std::shared_ptr<Entity>(entity));
+
+    // Pre-update to render the entity
+    entity->update();
 }
 
 void Game::set_cooldown_secs(uint8_t secs) {
