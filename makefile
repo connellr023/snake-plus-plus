@@ -20,7 +20,9 @@ ifeq ($(OS),Windows_NT)
         src/over_screen/over_screen.cpp \
         src/time_manager/time_manager.cpp \
 
-    LIBS = -lgdi32
+    # Static linking settings
+    CXXFLAGS += -static
+    LIBS = -lgdi32 -lmsvcrt
 else
     # Linux settings
     RM = rm -f
@@ -35,6 +37,8 @@ else
         src/over_screen/over_screen.cpp \
         src/time_manager/time_manager.cpp \
 
+    # Static linking settings
+    CXXFLAGS += -static-libgcc -static-libstdc++
     LIBS = -lX11
 endif
 
